@@ -7,3 +7,4 @@ Requerimientos de configuración del entorno de desarrollo.
 3) mongoDB versión 7.0.2
 4) mongosh versión 2.0.2
 5) postgresql versión 16.0.1
+6) go versión go1.21.3
