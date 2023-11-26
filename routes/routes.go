@@ -32,6 +32,9 @@ func SetupRouter(r *gin.Engine, collection *mongo.Collection, db *gorm.DB) *gin.
 	r.GET("/paises", func(c *gin.Context) { controllers.GetPaises(c, db) })
 	r.GET("/departamentos/:paisID", func(c *gin.Context) { controllers.GetDepartamentos(c, db) })
 	r.GET("/municipios/:departamentoID", func(c *gin.Context) { controllers.GetMunicipios(c, db) })
+	//=================================================================//
+	//Ruta para la busqueda de DTE
+	r.POST("/dte_search", func(c *gin.Context) { controllers.ObtenerTipoDTE() })
 
 	return r
 }
