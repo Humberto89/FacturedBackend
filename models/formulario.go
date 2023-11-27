@@ -18,18 +18,38 @@ const (
 	GrandeContribuyente  ContribuyenteType = "Grande Contribuyente"
 )
 
-type ExtranjeroType string
+type extranjeroType string
 
 const (
-	Si ExtranjeroType = "Si"
-	No ExtranjeroType = "No"
+	Si extranjeroType = "Si"
+	No extranjeroType = "No"
 )
 
-type ExtentoType string
+type extentoType string
 
 const (
-	Sies ExtentoType = "Si"
-	Noes ExtentoType = "No"
+	Sies extentoType = "Si"
+	Noes extentoType = "No"
+)
+
+type titulo string
+
+const (
+	Deposito     titulo = "Deposito"
+	Propiedad    titulo = "Propiedad"
+	Consignacion titulo = "Consignación"
+	Traslado     titulo = "Traslado"
+	Otros        titulo = "Otros"
+)
+
+type recinto string
+
+const (
+	MarítimadeAcajutla   recinto = "Marítima de Acajutla"
+	AéreaMonseñor        recinto = "Aérea Monseñor Óscar Arnulfo Romero"
+	TerrestreLasChinamas recinto = "Terrestre Las Chinamas"
+	TerrestreLaHachadura recinto = "Terrestre La Hachadura"
+	TerrestreSantaAna    recinto = "Terrestre Santa Ana"
 )
 
 type Formulario struct {
@@ -37,7 +57,7 @@ type Formulario struct {
 	ClienteType          ClienteType `gorm:"not null"`
 	Nombres              string      `gorm:"not null"`
 	Apellidos            string      `gorm:"not null"`
-	Extranjero           ExtranjeroType
+	Extranjero           extranjeroType
 	NRC                  string
 	CodigoCliente        string
 	PaisID               uint         `gorm:"column:pais_id"`
@@ -49,9 +69,9 @@ type Formulario struct {
 	Direccion            string       `gorm:"not null"`
 	Telefono             string
 	Correo               string
-	RecintoFiscal        string
+	RecintoFiscal        recinto
 	ActividadEconomica   string
-	TituloRemisionBienes string
+	TituloRemisionBienes titulo
 	ContribuyenteType    ContribuyenteType `gorm:"not null"`
-	ExencionIVA          ExtentoType
+	ExencionIVA          extentoType
 }
