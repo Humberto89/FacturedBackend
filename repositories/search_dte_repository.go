@@ -5,6 +5,8 @@ package repositories
 import (
 	"Go_Gin/models"
 	"context"
+	"errors"
+	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -17,12 +19,16 @@ func SetDTECollection(coll *mongo.Collection) {
 }
 
 func GetDTEsByFilter(filter bson.M) ([]models.Ident, error) {
+	if collection == nil {
+		return nil, errors.New("La colección no ha sido inicializada. Asegúrate de llamar a ConnectdbMongo antes de utilizarla")
+	}
+
 	var dtes []models.Ident
 
 	// Realizar la consulta a MongoDB usando el filtro
 	cursor, err := collection.Find(context.Background(), filter)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Error al ejecutar la consulta en MongoDB: %v", err)
 	}
 	defer cursor.Close(context.Background())
 
@@ -30,7 +36,7 @@ func GetDTEsByFilter(filter bson.M) ([]models.Ident, error) {
 	for cursor.Next(context.Background()) {
 		var ident models.Ident
 		if err := cursor.Decode(&ident); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("Error al decodificar el documento: %v", err)
 		}
 		dtes = append(dtes, ident)
 	}

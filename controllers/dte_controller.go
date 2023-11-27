@@ -12,6 +12,7 @@ import (
 )
 
 // Controlador para obtener DTEs según parámetros de la URL
+// Controlador para obtener DTEs según parámetros de la URL
 func GetDTEs(c *gin.Context) {
 	// Obtener parámetros de la URL
 	tipoDTE := c.Query("tipoDTE")
