@@ -66,7 +66,7 @@ func CreateDatabase() {
 	fmt.Println("¡Proceso completado!")
 }
 
-func ConnectdbMongo() (*mongo.Collection, error) {
+func ConnectdbMongo() (*mongo.Client, error) {
 	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017/")
 	client, err := mongo.Connect(context.Background(), clientOptions)
 	if err != nil {
@@ -81,8 +81,7 @@ func ConnectdbMongo() (*mongo.Collection, error) {
 
 	fmt.Println("Conexión exitosa a MongoDB")
 
-	collection = client.Database("DTE_Recepcion").Collection("Archivos")
-	return collection, nil
+	return client, nil
 }
 
 func ConnectdbPostgre() (*gorm.DB, error) {
