@@ -15,7 +15,15 @@ import (
 
 var collectionMap = map[string]string{
 	"01": "Factura",
+	"03": "Comprobante_de_credito_fiscal",
 	"04": "Nota_de_remision",
+	"05": "Nota_de_credito",
+	"06": "Nota_de_debito",
+	"07": "Comprobante_de_retencion",
+	"08": "Comprobante_de_liquidacion",
+	"09": "Documento_contable_de_liquidacion",
+	"11": "Factura_de_exportacion",
+	"14": "Factura_de_sujeto_excluido",
 	"15": "Comprobante_de_donacion",
 }
 
