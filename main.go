@@ -5,19 +5,11 @@ import (
 	"Go_Gin/migrations"
 	"Go_Gin/routes"
 	"fmt"
-	"log"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-
-	//Inicializacion de conexion a mongo
-	collection, err := database.ConnectdbMongo()
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	//Inicializacion de conexcion a postgre
 	db, err := database.ConnectdbPostgre()
 	if err != nil {
@@ -31,7 +23,7 @@ func main() {
 
 	r := gin.Default()
 
-	r = routes.SetupRouter(r, collection, db)
+	r = routes.SetupRouter(r, db)
 	r.Run(":8081")
 	fmt.Println("Conexión a la base de datos exitosa.")
 

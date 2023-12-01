@@ -6,10 +6,9 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func SetupRouter(r *gin.Engine, collection *mongo.Collection, db *gorm.DB) *gin.Engine {
+func SetupRouter(r *gin.Engine, db *gorm.DB) *gin.Engine {
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
 	config.AllowMethods = []string{"GET", "POST", "PUT", "OPTIONS"}
@@ -19,7 +18,7 @@ func SetupRouter(r *gin.Engine, collection *mongo.Collection, db *gorm.DB) *gin.
 	r.Use(cors.New(config))
 
 	//Ruta para recepcion DTE
-	r.POST("/upload", func(c *gin.Context) { controllers.FilesUpload(c, collection) })
+	r.POST("/upload", func(c *gin.Context) { controllers.FilesUpload(c) })
 	//=================================================================//
 
 	// Rutas para el CRUD de Inscripcion de provedores
@@ -33,7 +32,7 @@ func SetupRouter(r *gin.Engine, collection *mongo.Collection, db *gorm.DB) *gin.
 	r.GET("/municipios/:departamentoID", func(c *gin.Context) { controllers.GetMunicipios(c, db) })
 	//=================================================================//
 	//Ruta para la busqueda de DTE
-	r.GET("/busqueda", func(c *gin.Context) { controllers.GetDTEs(c) })
+	r.GET("/busqueda", func(c *gin.Context) { controllers.GetDTEs(c, db) })
 
 	return r
 }

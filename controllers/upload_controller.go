@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"Go_Gin/database"
 	"Go_Gin/repositories"
 	"Go_Gin/services"
 	"fmt"
@@ -10,10 +11,15 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func FilesUpload(c *gin.Context, collection *mongo.Collection) {
+func FilesUpload(c *gin.Context) {
+	client, err := database.ConnectdbMongo()
+	if err != nil {
+		log.Fatal(err)
+	}
+	collection := client.Database("DTE_Recepcion").Collection("Archivos")
+
 	form, _ := c.MultipartForm()
 	files := form.File["files"]
 

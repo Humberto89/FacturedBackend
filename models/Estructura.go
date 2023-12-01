@@ -1,5 +1,16 @@
 package models
 
+import "time"
+
+// Estructura para decodificar el documento JSON
+type Documento struct {
+	ID         string    `json:"_id"`
+	Filename   string    `json:"filename"`
+	Size       int       `json:"size"`
+	UploadDate time.Time `json:"uploadDate"`
+	Data       Ident     `json:"data"`
+}
+
 type Ident struct {
 	Identificacion struct {
 		Version          int    `json:"version"`
