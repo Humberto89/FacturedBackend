@@ -12,7 +12,7 @@ import (
 func SetupRouter(r *gin.Engine, collection *mongo.Collection, db *gorm.DB) *gin.Engine {
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
-	config.AllowMethods = []string{"GET", "POST", "OPTIONS"}
+	config.AllowMethods = []string{"GET", "POST", "PUT", "OPTIONS"}
 	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Allow-Methods", "Allow-Headers", "Expose-Headers"}
 	config.ExposeHeaders = []string{"Content-Length"}
 
@@ -28,7 +28,6 @@ func SetupRouter(r *gin.Engine, collection *mongo.Collection, db *gorm.DB) *gin.
 	r.POST("/formulario", func(c *gin.Context) { controllers.CreateFormulario(c, db) })
 	r.PUT("/formulario/:id", func(c *gin.Context) { controllers.UpdateFormulario(c, db) })
 	r.DELETE("/formulario/:id", func(c *gin.Context) { controllers.DeleteFormulario(c, db) })
-	// En tus rutas de servidor
 	r.GET("/paises", func(c *gin.Context) { controllers.GetPaises(c, db) })
 	r.GET("/departamentos/:paisID", func(c *gin.Context) { controllers.GetDepartamentos(c, db) })
 	r.GET("/municipios/:departamentoID", func(c *gin.Context) { controllers.GetMunicipios(c, db) })

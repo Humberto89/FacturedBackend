@@ -18,20 +18,6 @@ const (
 	GrandeContribuyente  ContribuyenteType = "Grande Contribuyente"
 )
 
-type extranjeroType string
-
-const (
-	Si extranjeroType = "Si"
-	No extranjeroType = "No"
-)
-
-type extentoType string
-
-const (
-	Sies extentoType = "Si"
-	Noes extentoType = "No"
-)
-
 type titulo string
 
 const (
@@ -57,7 +43,7 @@ type Formulario struct {
 	ClienteType          ClienteType `gorm:"not null"`
 	Nombres              string      `gorm:"not null"`
 	Apellidos            string      `gorm:"not null"`
-	Extranjero           extranjeroType
+	ExtranjeroType       string
 	NRC                  string
 	CodigoCliente        string
 	PaisID               uint         `gorm:"column:pais_id"`
@@ -73,5 +59,5 @@ type Formulario struct {
 	ActividadEconomica   string
 	TituloRemisionBienes titulo
 	ContribuyenteType    ContribuyenteType `gorm:"not null"`
-	ExencionIVA          extentoType
+	ExtentoType          string
 }
