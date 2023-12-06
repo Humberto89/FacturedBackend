@@ -11,7 +11,7 @@ import (
 func SetupRouter(r *gin.Engine, db *gorm.DB) *gin.Engine {
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
-	config.AllowMethods = []string{"GET", "POST", "PUT", "OPTIONS"}
+	config.AllowMethods = []string{"GET", "POST", "PUT", "OPTIONS", "DELETE"}
 	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Allow-Methods", "Allow-Headers", "Expose-Headers"}
 	config.ExposeHeaders = []string{"Content-Length"}
 
@@ -30,6 +30,7 @@ func SetupRouter(r *gin.Engine, db *gorm.DB) *gin.Engine {
 	r.GET("/paises", func(c *gin.Context) { controllers.GetPaises(c, db) })
 	r.GET("/departamentos/:paisID", func(c *gin.Context) { controllers.GetDepartamentos(c, db) })
 	r.GET("/municipios/:departamentoID", func(c *gin.Context) { controllers.GetMunicipios(c, db) })
+	r.GET("/checkIdentification", func(c *gin.Context) { controllers.CheckIdentificationExists(c, db) })
 	//=================================================================//
 	//Ruta para la busqueda de DTE
 	r.GET("/busqueda", func(c *gin.Context) { controllers.GetDTEs(c, db) })

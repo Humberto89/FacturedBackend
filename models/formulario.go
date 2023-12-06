@@ -40,6 +40,8 @@ const (
 
 type Formulario struct {
 	gorm.Model
+	Dui                  string      `gorm:"unique;not null"`
+	NIT                  string      `gorm:"unique;not null"`
 	ClienteType          ClienteType `gorm:"not null"`
 	Nombres              string      `gorm:"not null"`
 	Apellidos            string      `gorm:"not null"`
@@ -60,4 +62,6 @@ type Formulario struct {
 	TituloRemisionBienes titulo
 	ContribuyenteType    ContribuyenteType `gorm:"not null"`
 	ExtentoType          string
+	RazonSocial          string `gorm:"not null"`
+	NombreComercial      string `gorm:"not null"`
 }
