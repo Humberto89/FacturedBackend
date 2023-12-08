@@ -40,7 +40,7 @@ const (
 
 type Formulario struct {
 	gorm.Model
-	Dui                  string      `gorm:"unique;not null"`
+	Dui                  string      `gorm:"unique"`
 	NIT                  string      `gorm:"unique;not null"`
 	ClienteType          ClienteType `gorm:"not null"`
 	Nombres              string      `gorm:"not null"`

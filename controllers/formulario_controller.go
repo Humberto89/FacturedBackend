@@ -53,6 +53,11 @@ func CheckIdentificationExists(c *gin.Context, db *gorm.DB) {
 	case "dui":
 		tableName = "formularios"
 		columnName = "dui"
+		// Si el tipo es DUI, y el valor es nulo o cadena vacía, no realiza la verificación y devuelve false
+		if idValue == "null" || idValue == "" {
+			c.JSON(http.StatusOK, gin.H{"exists": false})
+			return
+		}
 	case "nit":
 		tableName = "formularios"
 		columnName = "nit"
@@ -74,6 +79,11 @@ func CheckIdentificationExists(c *gin.Context, db *gorm.DB) {
 
 // isIdentificationExists verifica si un documento ya existe en la base de datos.
 func isIdentificationExists(db *gorm.DB, idType string, idValue string) bool {
+	// Si el valor es nulo, devuelve false
+	if idValue == "" {
+		return false
+	}
+
 	var count int64
 	result := db.Table("formularios").Where(fmt.Sprintf("%s = ?", idType), idValue).Count(&count)
 	if result.Error != nil {
