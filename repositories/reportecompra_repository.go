@@ -9,11 +9,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// ObtenerArchivosYDatos obtiene archivos JSON de MongoDB y extrae datos específicos con paginación.
-func ReporteCompra(c *gin.Context) {
+// ReporteCompra obtiene archivos JSON de MongoDB y extrae datos específicos con paginación.
+func ReporteCompra(c *gin.Context, collections []string) {
 	// Conectar a MongoDB
 	client, err := database.ConnectdbMongo()
 	if err != nil {
@@ -26,58 +25,55 @@ func ReporteCompra(c *gin.Context) {
 	nombreBaseDeDatos := "ArchivosPrueba" // Reemplaza con el nombre de tu base de datos
 	database := client.Database(nombreBaseDeDatos)
 
-	collections := []string{
-		"Factura_de_exportacion",
-		"Nota_de_debito",
-		"Nota_de_credito",
-		"Comprobante_de_credito_fiscal",
-	}
-
-	// Realizar consultas en colecciones específicas
-	var archivos []bson.M
+	// Realizar consultas en todas las colecciones
+	var allDocuments []bson.M
+	totalRows := int64(0)
 	for _, col := range collections {
-		// Excluir colección específica
 		if col == "Archivos" {
 			continue
 		}
 
 		collection := database.Collection(col)
 
-		// Configurar índice de inicio y límite para paginación
-		pageNumber, _ := strconv.Atoi(c.Query("page"))
-		elementsPerPage, _ := strconv.Atoi(c.Query("perPage"))
-		startIndex := (pageNumber - 1) * elementsPerPage
-		limit := int64(elementsPerPage)
-
-		options := options.Find()
-		if startIndex != 0 {
-			options.SetSkip(int64(startIndex))
-		}
-
-		if limit != 0 {
-			options.SetLimit(limit)
-		}
-
-		// Consultar archivos en la colección actual
-		cursor, err := collection.Find(context.Background(), bson.M{}, options)
+		// Consultar todos los documentos en la colección actual
+		cursor, err := collection.Find(context.Background(), bson.M{})
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Error al consultar archivos en la colección %s: %v", col, err)})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Error al consultar la colección: %v", err)})
 			return
 		}
 		defer cursor.Close(context.Background())
 
-		// Procesar archivos y extraer datos
-		var archivosColeccion []bson.M
-		if err := cursor.All(context.Background(), &archivosColeccion); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Error al procesar archivos en la colección %s: %v", col, err)})
-			return
+		// Procesar documentos y extraer datos
+		var documents []bson.M
+		if err := cursor.All(context.Background(), &documents); err != nil {
+			// Manejar error
 		}
 
-		archivos = append(archivos, archivosColeccion...)
+		allDocuments = append(allDocuments, documents...)
+
+		// Contar documentos en la colección actual y sumar al totalRows
+		count, err := collection.CountDocuments(context.Background(), bson.M{})
+		if err != nil {
+			// Manejar error
+		}
+		totalRows += count
 	}
 
-	// Puedes procesar la lista de archivos aquí según tus necesidades
+	// Realizar la paginación sobre todos los documentos acumulados
+	pageNumber, _ := strconv.Atoi(c.Query("page"))
+	elementsPerPage, _ := strconv.Atoi(c.Query("perPage"))
+
+	startIndex := (pageNumber - 1) * elementsPerPage
+	endIndex := startIndex + elementsPerPage
+
+	// Verificar si el índice final no supera el tamaño total
+	if endIndex > len(allDocuments) {
+		endIndex = len(allDocuments)
+	}
+
+	// Obtener la porción de documentos para la página actual
+	paginatedDocuments := allDocuments[startIndex:endIndex]
 
 	// Ejemplo de respuesta
-	c.JSON(http.StatusOK, gin.H{"archivos": archivos})
+	c.JSON(http.StatusOK, gin.H{"archivos": paginatedDocuments, "totalRows": totalRows})
 }
