@@ -79,7 +79,7 @@ func CheckIdentificationExists(c *gin.Context, db *gorm.DB) {
 
 // isIdentificationExists verifica si un documento ya existe en la base de datos.
 func isIdentificationExists(db *gorm.DB, idType string, idValue string) bool {
-	// Si el valor es nulo, devuelve false
+	// Si el valor es nulo o vacío, devuelve false
 	if idValue == "" {
 		return false
 	}
@@ -87,7 +87,7 @@ func isIdentificationExists(db *gorm.DB, idType string, idValue string) bool {
 	var count int64
 	result := db.Table("formularios").Where(fmt.Sprintf("%s = ?", idType), idValue).Count(&count)
 	if result.Error != nil {
-		// Manejar el error según tus necesidades (puedes loguearlo o devolver un error)
+		// Manejar el error según tus necesidades
 		fmt.Printf("Error checking existence of %s: %s\n", idType, result.Error.Error())
 		return false
 	}
@@ -112,6 +112,9 @@ func CreateFormulario(c *gin.Context, db *gorm.DB) {
 		c.JSON(http.StatusConflict, gin.H{"error": "NIT already exists"})
 		return
 	}
+
+	// Después de la verificación de existencia para DUI y NIT
+	fmt.Printf("Attempting to create Formulario with DUI: %s, NIT: %s\n", formulario.Dui, formulario.NIT)
 
 	if err := db.Create(&formulario).Error; err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})

@@ -22,7 +22,7 @@ func ReporteCompra(c *gin.Context, collections []string) {
 	defer client.Disconnect(context.Background())
 
 	// Acceder a la base de datos
-	nombreBaseDeDatos := "ArchivosPrueba" // Reemplaza con el nombre de tu base de datos
+	nombreBaseDeDatos := "DTE_Recepcion" // Reemplaza con el nombre de tu base de datos
 	database := client.Database(nombreBaseDeDatos)
 
 	// Realizar consultas en todas las colecciones
