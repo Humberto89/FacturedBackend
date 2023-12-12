@@ -26,4 +26,7 @@ type Ident struct {
 		HorEmi           string `json:"horEmi"`
 		TipoMoneda       string `json:"tipoMoneda"`
 	} `json:"identificacion"`
+	Resumen struct {
+		CondicionOperacion int `json:"condicionOperacion"`
+	} `json:"resumen"`
 }
