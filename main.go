@@ -24,7 +24,7 @@ func main() {
 	r := gin.Default()
 
 	r = routes.SetupRouter(r, db)
-	r.Run(":8080")
+	r.Run(":8081")
 	fmt.Println("Conexión a la base de datos exitosa.")
 
 }
