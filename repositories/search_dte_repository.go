@@ -35,7 +35,7 @@ var operationsCM = map[string]string{
 	"3": "Otro",
 }
 
-func GetDTEsByFilter(filter bson.M, codigo string, operacion string) ([]models.Documento, error) {
+func GetDTEsByFilter(filter bson.M, codigo string) ([]models.Documento, error) {
 	// Obtener la colección y realizar la búsqueda
 	client, errr := database.ConnectdbMongo()
 	if errr != nil {
@@ -63,7 +63,7 @@ func GetDTEsByFilter(filter bson.M, codigo string, operacion string) ([]models.D
 		return nil, fmt.Errorf("Error al decodificar los resultados: %v", err)
 	}
 
-	//tipo de operacion
+	/**tipo de operacion
 	operacionColeccion, ok := operationsCM[operacion]
 	if !ok {
 		return nil, fmt.Errorf("Codigo de coleccion no valido")
@@ -80,7 +80,7 @@ func GetDTEsByFilter(filter bson.M, codigo string, operacion string) ([]models.D
 
 	if err := cursor.All(ctx, &resultados); err != nil {
 		return nil, fmt.Errorf("Error al decodificar los resultados: %v", err)
-	}
+	}**/
 
 	return resultados, nil
 }
