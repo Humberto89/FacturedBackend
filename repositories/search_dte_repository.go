@@ -62,5 +62,25 @@ func GetDTEsByFilter(filter bson.M, codigo string, operacion string) ([]models.D
 	if err := cursor.All(ctx, &resultados); err != nil {
 		return nil, fmt.Errorf("Error al decodificar los resultados: %v", err)
 	}
+
+	//tipo de operacion
+	operacionColeccion, ok := operationsCM[operacion]
+	if !ok {
+		return nil, fmt.Errorf("Codigo de coleccion no valido")
+	}
+	opCollection := client.Database("DTE_Recepcion").Collection(operacionColeccion)
+	ctx, cancelar := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancelar()
+
+	cursorOp, err := opCollection.Find(ctx, filter)
+	if err != nil {
+		return nil, fmt.Errorf("Error a realizar la busqueda %v", err)
+	}
+	defer cursorOp.Close(ctx)
+
+	if err := cursor.All(ctx, &resultados); err != nil {
+		return nil, fmt.Errorf("Error al decodificar los resultados: %v", err)
+	}
+
 	return resultados, nil
 }

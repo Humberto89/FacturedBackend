@@ -36,7 +36,7 @@ func GetDTEs(c *gin.Context, db *gorm.DB) {
 	}
 
 	// Consultar MongoDB con el filtro usando el repositorio
-	dtes, err := repositories.GetDTEsByFilter(filter, tipoDTE)
+	dtes, err := repositories.GetDTEsByFilter(filter, tipoDTE, tipoOperacionParam)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
