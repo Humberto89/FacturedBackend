@@ -13,6 +13,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
+// mapeo de las colecciones
 var collectionMap = map[string]string{
 	"01": "Factura",
 	"03": "Comprobante_de_credito_fiscal",
@@ -27,7 +28,14 @@ var collectionMap = map[string]string{
 	"15": "Comprobante_de_donacion",
 }
 
-func GetDTEsByFilter(filter bson.M, codigo string) ([]models.Documento, error) {
+// mapeo de la coleccion de las operaciones
+var operationsCM = map[string]string{
+	"1": "Contado",
+	"2": "A credito",
+	"3": "Otro",
+}
+
+func GetDTEsByFilter(filter bson.M, codigo string, operacion string) ([]models.Documento, error) {
 	// Obtener la colección y realizar la búsqueda
 	client, errr := database.ConnectdbMongo()
 	if errr != nil {
