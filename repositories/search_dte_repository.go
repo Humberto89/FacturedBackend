@@ -1,4 +1,3 @@
-// repositories/dte_repository.go
 package repositories
 
 import (
@@ -34,20 +33,20 @@ var operationsCM = map[string]string{
 	"3": "Otro",
 }
 
-func GetDTEsByFilter(filter bson.M, codigo string, operacion string) ([]models.Documento, error) {
+func GetDTEsByFilter(filter bson.M, tipoDTE string, operacion string) ([]models.Documento, error) {
 	// Obtener la colección y realizar la búsqueda
-	client, errr := database.ConnectdbMongo()
-	if errr != nil {
-		log.Fatal(errr)
+	client, err := database.ConnectdbMongo()
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	// Verificar si el código existe en el mapa
-	nombreColeccion, ok := collectionMap[codigo]
+	// Verificar si el tipoDTE existe en el mapa
+	dteColeccion, ok := collectionMap[tipoDTE]
 	if !ok {
-		return nil, fmt.Errorf("Código de colección no válido")
+		return nil, fmt.Errorf("TipoDTE no válido")
 	}
 
-	collection := client.Database("DTE_Recepcion").Collection(nombreColeccion)
+	collection := client.Database("DTE_Recepcion").Collection(dteColeccion)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -62,24 +61,21 @@ func GetDTEsByFilter(filter bson.M, codigo string, operacion string) ([]models.D
 		return nil, fmt.Errorf("Error al decodificar los resultados: %v", err)
 	}
 
-	//tipo de operacion
-	operacionColeccion, ok := operationsCM[operacion]
-	if !ok {
-		return nil, fmt.Errorf("Codigo de coleccion no valido")
-	}
-	opCollection := client.Database("DTE_Recepcion").Collection(operacionColeccion)
-	ctx, cancelar := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancelar()
-
-	cursorOp, err := opCollection.Find(ctx, filter)
-	if err != nil {
-		return nil, fmt.Errorf("Error a realizar la busqueda %v", err)
-	}
-	defer cursorOp.Close(ctx)
-
-	if err := cursor.All(ctx, &resultados); err != nil {
-		return nil, fmt.Errorf("Error al decodificar los resultados: %v", err)
-	}
+	// Agregar la lógica para filtrar por operación si es necesario
+	// operacionColeccion, ok := operationsCM[operacion]
+	// if !ok {
+	// 	return nil, fmt.Errorf("Operación no válida")
+	// }
+	// opCollection := client.Database("DTE_Recepcion").Collection(operacionColeccion)
+	// cursorOp, err := opCollection.Find(ctx, filter)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("Error al realizar la búsqueda: %v", err)
+	// }
+	// defer cursorOp.Close(ctx)
+	//
+	// if err := cursorOp.All(ctx, &resultados); err != nil {
+	// 	return nil, fmt.Errorf("Error al decodificar los resultados: %v", err)
+	// }
 
 	return resultados, nil
 }

@@ -1,46 +1,86 @@
-package controllers
+// repositories/dte_repository.go
+
+package repositories
 
 import (
+	"Go_Gin/database"
 	"Go_Gin/models"
 	"context"
-	"math/rand"
-	"net/http"
+	"fmt"
+	"log"
+	"time"
 
-	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var collection *mongo.Collection
-
-func ObtenerTipoDTE() string {
-	tipoDTE := []string{"01", "03", "04", "05", "06", "07", "08", "09", "11", "14", "15"}
-	index := rand.Intn(len(tipoDTE))
-	return tipoDTE[index]
+// mapeo de las colecciones
+var collectionMap = map[string]string{
+	"01": "Factura",
+	"03": "Comprobante_de_credito_fiscal",
+	"04": "Nota_de_remision",
+	"05": "Nota_de_credito",
+	"06": "Nota_de_debito",
+	"07": "Comprobante_de_retencion",
+	"08": "Comprobante_de_liquidacion",
+	"09": "Documento_contable_de_liquidacion",
+	"11": "Factura_de_exportacion",
+	"14": "Factura_de_sujeto_excluido",
+	"15": "Comprobante_de_donacion",
 }
 
-// getDTEs is a handler function to get all DTE documents from MongoDB
-func GetDTEs(c *gin.Context) {
-	var dtes []models.Ident
+// mapeo de la coleccion de las operaciones
+var operationsCM = map[string]string{
+	"1": "Contado",
+	"2": "A credito",
+	"3": "Otro",
+}
 
-	// Consult MongoDB to get all documents
-	cursor, err := collection.Find(context.Background(), bson.M{})
+func GetDTEsByFilter(filter bson.M, codigo string) ([]models.Documento, error) {
+	// Obtener la colección y realizar la búsqueda
+	client, errr := database.ConnectdbMongo()
+	if errr != nil {
+		log.Fatal(errr)
+	}
+
+	// Verificar si el código existe en el mapa
+	nombreColeccion, ok := collectionMap[codigo]
+	if !ok {
+		return nil, fmt.Errorf("Código de colección no válido")
+	}
+
+	collection := client.Database("DTE_Recepcion").Collection(nombreColeccion)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	cursor, err := collection.Find(ctx, filter)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error al mostrar los documentos": err.Error()})
-		return
+		return nil, fmt.Errorf("Error al realizar la búsqueda: %v", err)
 	}
-	defer cursor.Close(context.Background())
+	defer cursor.Close(ctx)
 
-	// Iterate over documents and add them to the slice
-	for cursor.Next(context.Background()) {
-		var ident models.Ident
-		if err := cursor.Decode(&ident); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		dtes = append(dtes, ident)
+	var resultados []models.Documento
+	if err := cursor.All(ctx, &resultados); err != nil {
+		return nil, fmt.Errorf("Error al decodificar los resultados: %v", err)
 	}
-	ObtenerTipoDTE() // This line doesn't seem to have any effect, consider removing or updating it
 
-	c.JSON(http.StatusOK, dtes)
+	/**tipo de operacion
+	operacionColeccion, ok := operationsCM[operacion]
+	if !ok {
+		return nil, fmt.Errorf("Codigo de coleccion no valido")
+	}
+	opCollection := client.Database("DTE_Recepcion").Collection(operacionColeccion)
+	ctx, cancelar := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancelar()
+
+	cursorOp, err := opCollection.Find(ctx, filter)
+	if err != nil {
+		return nil, fmt.Errorf("Error a realizar la busqueda %v", err)
+	}
+	defer cursorOp.Close(ctx)
+
+	if err := cursor.All(ctx, &resultados); err != nil {
+		return nil, fmt.Errorf("Error al decodificar los resultados: %v", err)
+	}**/
+
+	return resultados, nil
 }

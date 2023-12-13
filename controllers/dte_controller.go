@@ -28,10 +28,8 @@ func GetDTEs(c *gin.Context, db *gorm.DB) {
 			"$lte": fechaFinParam,
 		}
 	}
-	if tipoDTEParam != "" {
+	if tipoDTEParam != "" && condicionOperacionParam != "" {
 		filter["data.identificacion.tipoDte"] = bson.M{"$gte": tipoDTEParam}
-	}
-	if condicionOperacionParam != "" {
 		filter["data.resumen.condicionOperacion"] = bson.M{"$gte": condicionOperacionParam}
 	}
 
