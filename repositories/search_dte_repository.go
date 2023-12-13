@@ -50,6 +50,12 @@ func GetDTEsByFilter(filter bson.M, tipoDTE string, operacion string) ([]models.
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
+	// Agregar condición de operación al filtro si está presente
+	if operacion != "" {
+		filter["data.resumen.condicionOperacion"] = bson.M{"$gte": operacion}
+	}
+
+	// Consulta para el tipoDTE (y la condición de operación si está presente)
 	cursor, err := collection.Find(ctx, filter)
 	if err != nil {
 		return nil, fmt.Errorf("Error al realizar la búsqueda: %v", err)
@@ -60,22 +66,6 @@ func GetDTEsByFilter(filter bson.M, tipoDTE string, operacion string) ([]models.
 	if err := cursor.All(ctx, &resultados); err != nil {
 		return nil, fmt.Errorf("Error al decodificar los resultados: %v", err)
 	}
-
-	// Agregar la lógica para filtrar por operación si es necesario
-	// operacionColeccion, ok := operationsCM[operacion]
-	// if !ok {
-	// 	return nil, fmt.Errorf("Operación no válida")
-	// }
-	// opCollection := client.Database("DTE_Recepcion").Collection(operacionColeccion)
-	// cursorOp, err := opCollection.Find(ctx, filter)
-	// if err != nil {
-	// 	return nil, fmt.Errorf("Error al realizar la búsqueda: %v", err)
-	// }
-	// defer cursorOp.Close(ctx)
-	//
-	// if err := cursorOp.All(ctx, &resultados); err != nil {
-	// 	return nil, fmt.Errorf("Error al decodificar los resultados: %v", err)
-	// }
 
 	return resultados, nil
 }
