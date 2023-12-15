@@ -4,7 +4,9 @@ import (
 	"Go_Gin/database"
 	"Go_Gin/models"
 	"context"
+	"encoding/base64"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"time"
 
@@ -33,7 +35,7 @@ var operationsCM = map[string]string{
 	"3": "Otro",
 }
 
-func GetDTEsByFilter(filter bson.M, tipoDTE string, operacion string) ([]models.Documento, error) {
+func GetDTEsByFilter(filter bson.M, tipoDTE string) ([]models.Documento, error) {
 	// Obtener la colección y realizar la búsqueda
 	client, err := database.ConnectdbMongo()
 	if err != nil {
@@ -51,9 +53,9 @@ func GetDTEsByFilter(filter bson.M, tipoDTE string, operacion string) ([]models.
 	defer cancel()
 
 	// Agregar condición de operación al filtro si está presente
-	if operacion != "" {
-		filter["data.resumen.condicionOperacion"] = bson.M{"$gte": operacion}
-	}
+	//if operacion != "" {
+	//	filter["data.resumen.condicionOperacion"] = bson.M{"$gte": operacion}
+	//}
 
 	// Consulta para el tipoDTE (y la condición de operación si está presente)
 	cursor, err := collection.Find(ctx, filter)
@@ -66,6 +68,38 @@ func GetDTEsByFilter(filter bson.M, tipoDTE string, operacion string) ([]models.
 	if err := cursor.All(ctx, &resultados); err != nil {
 		return nil, fmt.Errorf("Error al decodificar los resultados: %v", err)
 	}
-
+	log.Printf("Resultados encontrados: %v\n", resultados)
 	return resultados, nil
+}
+
+// Convertir el contenido base64 a bytes
+func base64ToBytes(base64String string) ([]byte, error) {
+	return base64.StdEncoding.DecodeString(base64String)
+}
+
+// Escribir los bytes en un archivo PDF
+func bytesToPDF(bytes []byte, filename string) error {
+	return ioutil.WriteFile(filename, bytes, 0644)
+}
+
+// Función para obtener datos del PDF por código de generación
+func GetPDFData() {
+	// Reemplaza con el base64 generado
+	base64String := "..."
+
+	// Decodificar base64 a bytes
+	pdfBytes, err := base64ToBytes(base64String)
+	if err != nil {
+		fmt.Println("Error al decodificar base64:", err)
+		return
+	}
+
+	// Escribir los bytes en un nuevo archivo PDF
+	err = bytesToPDF(pdfBytes, "nuevo_archivo.pdf")
+	if err != nil {
+		fmt.Println("Error al escribir el archivo PDF:", err)
+		return
+	}
+
+	fmt.Println("Conversión exitosa. Compara el nuevo_archivo.pdf con el original.")
 }

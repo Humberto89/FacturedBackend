@@ -17,7 +17,7 @@ func GetDTEs(c *gin.Context, db *gorm.DB) {
 	tipoDTEParam := c.Query("tipoDTE")
 	fechaInicioParam := c.Query("fechaInicio")
 	fechaFinParam := c.Query("fechaFin")
-	condicionOperacionParam := c.Query("condicionOperacion")
+	//condicionOperacionParam := c.Query("condicionOperacion")
 
 	// Construir filtro para la consulta
 	filter := bson.M{}
@@ -28,16 +28,18 @@ func GetDTEs(c *gin.Context, db *gorm.DB) {
 			"$lte": fechaFinParam,
 		}
 	}
-	if tipoDTEParam != "" && condicionOperacionParam != "" {
+	if tipoDTEParam != "" {
 		filter["data.identificacion.tipoDte"] = bson.M{"$gte": tipoDTEParam}
-		filter["data.resumen.condicionOperacion"] = bson.M{"$gte": condicionOperacionParam}
+		//filter["data.resumen.condiconOperacion"] = bson.M{"$gte": condicionOperacionParam}
+
 	}
 
 	// Consultar MongoDB con el filtro usando el repositorio
-	dtes, err := repositories.GetDTEsByFilter(filter, tipoDTEParam, condicionOperacionParam)
+	dtes, err := repositories.GetDTEsByFilter(filter, tipoDTEParam)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, dtes)
+
 }

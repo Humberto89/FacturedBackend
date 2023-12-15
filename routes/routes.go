@@ -2,6 +2,7 @@ package routes
 
 import (
 	"Go_Gin/controllers"
+	"Go_Gin/repositories"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -34,7 +35,7 @@ func SetupRouter(r *gin.Engine, db *gorm.DB) *gin.Engine {
 	//=================================================================//
 	//Ruta para la busqueda de DTE
 	r.GET("/busqueda", func(c *gin.Context) { controllers.GetDTEs(c, db) })
-
+	r.GET("/descargar-pdf/:codigoGeneracion", func(c *gin.Context) { repositories.GetPDFData() })
 	//Ruta de reportes
 
 	r.GET("/reportecompra", controllers.ReporteCompra)
