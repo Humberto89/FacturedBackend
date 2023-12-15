@@ -85,7 +85,7 @@ func ConnectdbMongo() (*mongo.Client, error) {
 }
 
 func ConnectdbPostgre() (*gorm.DB, error) {
-	db, err := gorm.Open("postgres", "user=postgres password=B@sanchez93 dbname=DBFormulario sslmode=disable")
+	db, err := gorm.Open("postgres", "user=postgres password=0000 dbname=DBFormulario sslmode=disable")
 	if err != nil {
 		return nil, err
 	}

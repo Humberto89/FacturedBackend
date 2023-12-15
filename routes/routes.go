@@ -36,7 +36,9 @@ func SetupRouter(r *gin.Engine, db *gorm.DB) *gin.Engine {
 	r.GET("/busqueda", func(c *gin.Context) { controllers.GetDTEs(c, db) })
 
 	//Ruta de reportes
-
+	r.GET("/municipio/:id", func(c *gin.Context) { controllers.GetMunicipioByID(c, db) })
+	r.GET("/pais/:id", func(c *gin.Context) { controllers.GetPaisByID(c, db) })
+	r.GET("/departamento/:id", func(c *gin.Context) { controllers.GetDepartamentoByID(c, db) })
 	r.GET("/reportecompra", controllers.ReporteCompra)
 
 	return r
