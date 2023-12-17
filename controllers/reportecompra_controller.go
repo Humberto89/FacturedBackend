@@ -10,10 +10,14 @@ import (
 func ReporteCompra(c *gin.Context) {
 	//colecciones a extraer dte
 	collections := []string{
-		"Factura_de_exportacion",
-		"Nota_de_debito",
-		"Nota_de_credito",
-		"Comprobante_de_credito_fiscal",
+		"Nota_de_remision",
+		"Comprobante_de_donacion",
+		"Factura_de_sujeto_excluido",
+		"Comprobante_de_liquidacion",
+		"Comprobante_de_retencion",
+		"Documento_contable_de_liquidacion",
+		"Factura",
 	}
+
 	repositories.ReporteCompra(c, collections)
 }
