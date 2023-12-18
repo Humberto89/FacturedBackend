@@ -92,7 +92,11 @@ func GetDTEsByType(filter bson.M, tipoDTE string, condicionOperacion int) ([]mod
 
 // Convertir el contenido base64 a bytes
 func base64ToBytes(base64String string) ([]byte, error) {
-	return base64.StdEncoding.DecodeString(base64String)
+	decodedBytes, err := base64.StdEncoding.DecodeString(base64String)
+	if err != nil {
+		return nil, fmt.Errorf("Error al decodificar base64: %v", err)
+	}
+	return decodedBytes, nil
 }
 
 // Escribir los bytes en un archivo PDF
