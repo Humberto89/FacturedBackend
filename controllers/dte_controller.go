@@ -28,9 +28,15 @@ func GetDTEs(c *gin.Context, db *gorm.DB) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Error al convertir condicionOperacionParam a entero: %v", err)})
 		return
 	}
+	//validar el valor de la condicion de la operacion
+	if condicionOperacion < 1 || condicionOperacion > 3 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "El valor de la condición de operación no es válido"})
+		return
+	}
 	// Construir filtros para la consulta
-	filterDTEOp := bson.M{}
+	//filterDTEOp := bson.M{}
 	filterDTEType := bson.M{}
+	filterDTEOp := bson.M{}
 	filterDTEDate := bson.M{}
 	//definiendo valores
 	if fechaInicioParam != "" && fechaFinParam != "" {
@@ -46,8 +52,13 @@ func GetDTEs(c *gin.Context, db *gorm.DB) {
 	//filtro para tipo de DTE
 	if condicionOperacion != 0 {
 		// Accediendo al tipo de pago
-		filterDTEOp["data.resumen.condicionOperacion"] = bson.M{"$gte": strconv.Itoa(condicionOperacion)}
+		filterDTEOp["data.resumen.condicionOperacion"] = bson.M{"data.resumen.condicionOperacion": condicionOperacion}
 	}
+	/**
+	filterDTE["$or"] = []bson.M{
+		{"data.identificacion.tipoDte": tipoDTEParam},
+		{"data.resumen.condicionOperacion": condicionOperacion},
+	}*/
 
 	// Consultar MongoDB con el filtro usando el repositorio
 	dtes, err := repositories.GetDTEsByType(filterDTEDate, tipoDTEParam, condicionOperacion)
