@@ -35,7 +35,8 @@ var operationsCM = map[string]string{
 	"3": "Otro",
 }
 
-func GetDTEsByFilter(filter bson.M, tipoDTE string) ([]models.Documento, error) {
+// filtrar por tipo de DTE
+func GetDTEsByType(filter bson.M, tipoDTE string) ([]models.Documento, error) {
 	// Obtener la colección y realizar la búsqueda
 	client, err := database.ConnectdbMongo()
 	if err != nil {
@@ -53,10 +54,6 @@ func GetDTEsByFilter(filter bson.M, tipoDTE string) ([]models.Documento, error) 
 	defer cancel()
 
 	// Agregar condición de operación al filtro si está presente
-	//if operacion != "" {
-	//	filter["data.resumen.condicionOperacion"] = bson.M{"$gte": operacion}
-	//}
-
 	// Consulta para el tipoDTE (y la condición de operación si está presente)
 	cursor, err := collection.Find(ctx, filter)
 	if err != nil {

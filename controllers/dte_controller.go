@@ -17,25 +17,32 @@ func GetDTEs(c *gin.Context, db *gorm.DB) {
 	tipoDTEParam := c.Query("tipoDTE")
 	fechaInicioParam := c.Query("fechaInicio")
 	fechaFinParam := c.Query("fechaFin")
-	//condicionOperacionParam := c.Query("condicionOperacion")
+	condicionOperacionParam := c.Query("condicionOperacion")
 
-	// Construir filtro para la consulta
+	// Construir filtros para la consulta
 	filter := bson.M{}
+	filterDTEType := bson.M{}
+	filterDteDate := bson.M{}
+	//definiendo valores
 	if fechaInicioParam != "" && fechaFinParam != "" {
 		// Usar notación de puntos para filtrar por fecha dentro del objeto identificacion
-		filter["data.identificacion.fecEmi"] = bson.M{
+		filterDteDate["data.identificacion.fecEmi"] = bson.M{
 			"$gte": fechaInicioParam,
 			"$lte": fechaFinParam,
 		}
 	}
 	if tipoDTEParam != "" {
 		filter["data.identificacion.tipoDte"] = bson.M{"$gte": tipoDTEParam}
-		//filter["data.resumen.condiconOperacion"] = bson.M{"$gte": condicionOperacionParam}
+	}
+	//filtro para tipo de DTE
+	if condicionOperacionParam != "" {
+		//accediendo al tipo de pago
+		filterDTEType["data.resumen.condiconOperacion"] = bson.M{"$gte": condicionOperacionParam}
 
 	}
 
 	// Consultar MongoDB con el filtro usando el repositorio
-	dtes, err := repositories.GetDTEsByFilter(filter, tipoDTEParam)
+	dtes, err := repositories.GetDTEsByType(filterDteDate, tipoDTEParam)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
