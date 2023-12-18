@@ -29,14 +29,14 @@ var collectionMap = map[string]string{
 }
 
 // mapeo de la coleccion de las operaciones
-var operationsCM = map[string]string{
-	"1": "Contado",
-	"2": "A credito",
-	"3": "Otro",
+var operationsCM = map[int]string{
+	1: "Contado",
+	2: "A credito",
+	3: "Otro",
 }
 
 // filtrar por tipo de DTE
-func GetDTEsByType(filter bson.M, tipoDTE string) ([]models.Documento, error) {
+func GetDTEsByType(filter bson.M, tipoDTE string, condicionOperacion int) ([]models.Documento, error) {
 	// Obtener la colección y realizar la búsqueda
 	client, err := database.ConnectdbMongo()
 	if err != nil {
@@ -48,23 +48,44 @@ func GetDTEsByType(filter bson.M, tipoDTE string) ([]models.Documento, error) {
 	if !ok {
 		return nil, fmt.Errorf("TipoDTE no válido")
 	}
+	//verificar si la condicion de la operacion existe
+	opColeccion, ok := operationsCM[condicionOperacion]
+	if !ok {
+		return nil, fmt.Errorf("condición no válida")
+	}
+	//tipo de DTE
+	collectionType := client.Database("DTE_Recepcion").Collection(dteColeccion)
 
-	collection := client.Database("DTE_Recepcion").Collection(dteColeccion)
+	//condicion de operacion
+	collectionOp := client.Database("DTE_Recepcion").Collection(opColeccion)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	// Agregar condición de operación al filtro si está presente
 	// Consulta para el tipoDTE (y la condición de operación si está presente)
-	cursor, err := collection.Find(ctx, filter)
+	cursorType, err := collectionType.Find(ctx, filter)
 	if err != nil {
 		return nil, fmt.Errorf("Error al realizar la búsqueda: %v", err)
 	}
-	defer cursor.Close(ctx)
-
+	defer cursorType.Close(ctx)
+	//consulta de condicion de operacion
+	cursorOp, err := collectionOp.Find(ctx, filter)
+	if err != nil {
+		return nil, fmt.Errorf("Error al realizar la busqueda: %v", err)
+	}
+	defer cursorOp.Close(ctx)
+	//decodificacion de resultados para tipo de DTE
 	var resultados []models.Documento
-	if err := cursor.All(ctx, &resultados); err != nil {
+	if err := cursorType.All(ctx, &resultados); err != nil {
 		return nil, fmt.Errorf("Error al decodificar los resultados: %v", err)
 	}
+	// Decodificación de resultados para condición de operación y agregado al slice
+	var resultadosOp []models.Documento
+	if err := cursorOp.All(ctx, &resultadosOp); err != nil {
+		return nil, fmt.Errorf("Error al decodificar los resultados para condición de operación: %v", err)
+	}
+	//combinando salidas
+	resultados = append(resultados, resultadosOp...)
 	log.Printf("Resultados encontrados: %v\n", resultados)
 	return resultados, nil
 }

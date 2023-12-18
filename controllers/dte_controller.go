@@ -3,7 +3,10 @@ package controllers
 
 import (
 	"Go_Gin/repositories"
+	"fmt"
 	"net/http"
+
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -19,6 +22,12 @@ func GetDTEs(c *gin.Context, db *gorm.DB) {
 	fechaFinParam := c.Query("fechaFin")
 	condicionOperacionParam := c.Query("condicionOperacion")
 
+	// Convertir condicionOperacionParam a entero
+	condicionOperacion, err := strconv.Atoi(condicionOperacionParam)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Error al convertir condicionOperacionParam a entero: %v", err)})
+		return
+	}
 	// Construir filtros para la consulta
 	filterDTEOp := bson.M{}
 	filterDTEType := bson.M{}
@@ -35,14 +44,13 @@ func GetDTEs(c *gin.Context, db *gorm.DB) {
 		filterDTEType["data.identificacion.tipoDte"] = bson.M{"$gte": tipoDTEParam}
 	}
 	//filtro para tipo de DTE
-	if condicionOperacionParam != "" {
-		//accediendo al tipo de pago
-		filterDTEOp["data.resumen.condiconOperacion"] = bson.M{"$gte": condicionOperacionParam}
-
+	if condicionOperacion != 0 {
+		// Accediendo al tipo de pago
+		filterDTEOp["data.resumen.condicionOperacion"] = bson.M{"$gte": strconv.Itoa(condicionOperacion)}
 	}
 
 	// Consultar MongoDB con el filtro usando el repositorio
-	dtes, err := repositories.GetDTEsByType(filterDTEDate, tipoDTEParam)
+	dtes, err := repositories.GetDTEsByType(filterDTEDate, tipoDTEParam, condicionOperacion)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
