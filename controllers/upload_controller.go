@@ -48,7 +48,7 @@ func FilesUpload(c *gin.Context) {
 			if err != nil {
 				filesError = append(filesError, gin.H{
 					"filename": file.Filename,
-					"error":    fmt.Sprintf("error al procesar %s: %s ", file.Filename),
+					"error":    fmt.Sprintf("error al procesar %s: %s ", file.Filename, ""),
 				})
 				continue
 			}
