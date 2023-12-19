@@ -17,7 +17,7 @@ import (
 
 func GuardarArchivoMongo(file *multipart.FileHeader, collection *mongo.Collection) (string, error) {
 	if !services.ExtensionValor(file.Filename) {
-		return "", fmt.Errorf("tipo de archivo no permitido. Solo se permiten archivos .json y .pdf.")
+		return "", fmt.Errorf("tipo de archivo no permitido, solo se permiten archivos .json y .pdf")
 	}
 
 	fileData, err := file.Open()
@@ -122,7 +122,7 @@ func GuardarArchivoMongo(file *multipart.FileHeader, collection *mongo.Collectio
 
 		doc["pdfData"] = base64String
 	} else {
-		return "", fmt.Errorf("tipo de archivo no permitido. Solo se permiten archivos .json y .pdf.")
+		return "", fmt.Errorf("tipo de archivo no permitido, solo se permiten archivos .json y .pdf")
 	}
 
 	result, err := collection.InsertOne(context.Background(), doc)

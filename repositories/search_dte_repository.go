@@ -36,7 +36,7 @@ var operationsCM = map[int]string{
 }
 
 // filtrar por tipo de DTE
-func GetDTEsByType(filter bson.M, tipoDTE string, condicionOperacion int) ([]models.Documento, error) {
+func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, condicionOperacion int) ([]models.Documento, error) {
 	// Obtener la colección y realizar la búsqueda
 	client, err := database.ConnectdbMongo()
 	if err != nil {
@@ -63,30 +63,30 @@ func GetDTEsByType(filter bson.M, tipoDTE string, condicionOperacion int) ([]mod
 
 	// Agregar condición de operación al filtro si está presente
 	// Consulta para el tipoDTE (y la condición de operación si está presente)
-	cursorType, err := collectionType.Find(ctx, filter)
+	cursorType, err := collectionType.Find(ctx, filterDTEDate)
 	if err != nil {
-		return nil, fmt.Errorf("Error al realizar la búsqueda: %v", err)
+		return nil, fmt.Errorf("error al realizar la búsqueda: %v", err)
 	}
 	defer cursorType.Close(ctx)
 	//consulta de condicion de operacion
-	cursorOp, err := collectionOp.Find(ctx, filter)
+	cursorOp, err := collectionOp.Find(ctx, filterDTEDate)
 	if err != nil {
-		return nil, fmt.Errorf("Error al realizar la busqueda: %v", err)
+		return nil, fmt.Errorf("error al realizar la busqueda: %v", err)
 	}
 	defer cursorOp.Close(ctx)
 	//decodificacion de resultados para tipo de DTE
 	var resultados []models.Documento
 	if err := cursorType.All(ctx, &resultados); err != nil {
-		return nil, fmt.Errorf("Error al decodificar los resultados: %v", err)
+		return nil, fmt.Errorf("error al decodificar los resultados: %v", err)
 	}
 	// Decodificación de resultados para condición de operación y agregado al slice
 	var resultadosOp []models.Documento
 	if err := cursorOp.All(ctx, &resultadosOp); err != nil {
-		return nil, fmt.Errorf("Error al decodificar los resultados para condición de operación: %v", err)
+		return nil, fmt.Errorf("error al decodificar los resultados para condición de operación: %v", err)
 	}
 	//combinando salidas
 	resultados = append(resultados, resultadosOp...)
-	log.Printf("Resultados encontrados: %v\n", resultados)
+	log.Printf("resultados encontrados: %v\n", resultados)
 	return resultados, nil
 }
 
@@ -94,7 +94,7 @@ func GetDTEsByType(filter bson.M, tipoDTE string, condicionOperacion int) ([]mod
 func base64ToBytes(base64String string) ([]byte, error) {
 	decodedBytes, err := base64.StdEncoding.DecodeString(base64String)
 	if err != nil {
-		return nil, fmt.Errorf("Error al decodificar base64: %v", err)
+		return nil, fmt.Errorf("error al decodificar base64: %v", err)
 	}
 	return decodedBytes, nil
 }
