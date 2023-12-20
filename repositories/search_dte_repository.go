@@ -35,6 +35,13 @@ var operationsCM = map[string]string{
 	"3": "Otro",
 }
 
+// mapeo de la coleccion de las operaciones
+var statusMap = map[string]string{
+	"1": "INICIADO",
+	"2": "PROCESO",
+	"3": "COMPLETO",
+}
+
 // filtrar por tipo de DTE
 func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, condicionOperacion string, estadoDTE string) ([]models.Documento, error) {
 	// Obtener la colección y realizar la búsqueda
@@ -53,11 +60,17 @@ func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, condicionOperacion stri
 	if !ok {
 		return nil, fmt.Errorf("condición no válida")
 	}
+	//verificar si la condicion de la operacion existe
+	statusColeccion, ok := statusMap[estadoDTE]
+	if !ok {
+		return nil, fmt.Errorf("estado no válido")
+	}
 	//tipo de DTE
 	collectionType := client.Database("DTE_Recepcion").Collection(dteColeccion)
 
 	//condicion de operacion
 	collectionOp := client.Database("DTE_Recepcion").Collection(opColeccion)
+	collectionStatus := client.Database("DTE_Recepcion").Collection(statusColeccion)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -74,6 +87,12 @@ func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, condicionOperacion stri
 		return nil, fmt.Errorf("error al realizar la busqueda: %v", err)
 	}
 	defer cursorOp.Close(ctx)
+	//consulta de condicion de operacion
+	cursorSt, err := collectionStatus.Find(ctx, filterDTEDate)
+	if err != nil {
+		return nil, fmt.Errorf("error al realizar la busqueda: %v", err)
+	}
+	defer cursorSt.Close(ctx)
 	//decodificacion de resultados para tipo de DTE
 	var resultados []models.Documento
 	if err := cursorType.All(ctx, &resultados); err != nil {
@@ -84,12 +103,19 @@ func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, condicionOperacion stri
 	if err := cursorOp.All(ctx, &resultadosOp); err != nil {
 		return nil, fmt.Errorf("error al decodificar los resultados para condición de operación: %v", err)
 	}
+	// Decodificación de resultados para condición de operación y agregado al slice
+	var resultadosSt []models.Documento
+	if err := cursorSt.All(ctx, &resultadosSt); err != nil {
+		return nil, fmt.Errorf("error al decodificar los resultados para condición de operación: %v", err)
+	}
 	//combinando salidas
 	resultados = append(resultados, resultadosOp...)
+	resultados = append(resultados, resultadosSt...)
 	log.Printf("resultados encontrados: %v\n", resultados)
 	return resultados, nil
 }
 
+// Fase 2
 // Convertir el contenido base64 a bytes
 func base64ToBytes(base64String string) ([]byte, error) {
 	decodedBytes, err := base64.StdEncoding.DecodeString(base64String)
