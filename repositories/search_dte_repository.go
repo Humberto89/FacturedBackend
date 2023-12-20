@@ -29,14 +29,14 @@ var collectionMap = map[string]string{
 }
 
 // mapeo de la coleccion de las operaciones
-var operationsCM = map[int]string{
-	1: "Contado",
-	2: "A credito",
-	3: "Otro",
+var operationsCM = map[string]string{
+	"1": "Contado",
+	"2": "A credito",
+	"3": "Otro",
 }
 
 // filtrar por tipo de DTE
-func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, condicionOperacion int) ([]models.DTE, error) {
+func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, condicionOperacion string) ([]models.DTE, error) {
 	// Obtener la colección y realizar la búsqueda
 	client, err := database.ConnectdbMongo()
 	if err != nil {
