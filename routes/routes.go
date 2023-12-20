@@ -2,7 +2,9 @@ package routes
 
 import (
 	"Go_Gin/controllers"
+
 	"Go_Gin/repositories"
+	"net/http"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -35,7 +37,21 @@ func SetupRouter(r *gin.Engine, db *gorm.DB) *gin.Engine {
 	//=================================================================//
 	//Ruta para la busqueda de DTE
 	r.GET("/busqueda", func(c *gin.Context) { controllers.GetDTEs(c, db) })
-	r.GET("/descargar-pdf/:codigoGeneracion", func(c *gin.Context) { repositories.GetPDFData() })
+	r.GET("/descargar-pdf/:id", func(c *gin.Context) {
+		// Obtener el _id desde los parámetros de la URL
+		id := c.Param("id")
+
+		// Llamar a la función GetPDFDataByID con el _id proporcionado
+		err := repositories.GetPDFDataByID(id)
+		if err != nil {
+			// Manejar el error, por ejemplo, enviar una respuesta de error al cliente
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		// Si todo está bien, podrías enviar una respuesta de éxito al cliente si es necesario
+		c.JSON(http.StatusOK, gin.H{"message": "Descarga exitosa"})
+	})
 	//Ruta de reportes
 	r.GET("/municipio/:id", func(c *gin.Context) { controllers.GetMunicipioByID(c, db) })
 	r.GET("/pais/:id", func(c *gin.Context) { controllers.GetPaisByID(c, db) })

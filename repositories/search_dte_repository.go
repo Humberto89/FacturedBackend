@@ -35,15 +35,8 @@ var operationsCM = map[string]string{
 	"3": "Otro",
 }
 
-// mapeo de la coleccion del estado
-var statusMap = map[string]string{
-	"1": "INICIADO",
-	"2": "PROCESO",
-	"3": "COMPLETADO",
-}
-
 // filtrar por tipo de DTE
-func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, condicionOperacion string, filterStatus bson.M) ([]models.Documento, error) {
+func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, condicionOperacion string, estadoDTE string) ([]models.Documento, error) {
 	// Obtener la colección y realizar la búsqueda
 	client, err := database.ConnectdbMongo()
 	if err != nil {
@@ -51,15 +44,13 @@ func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, condicionOperacion stri
 	}
 
 	// Verificar si el tipoDTE existe en el mapa
-	dteColeccion, ok1 := collectionMap[tipoDTE]
-	if !ok1 {
+	dteColeccion, ok := collectionMap[tipoDTE]
+	if !ok {
 		return nil, fmt.Errorf("TipoDTE no válido")
 	}
 	//verificar si la condicion de la operacion existe
-
-	//verificar si la condicion de la operacion existe
-	opColeccion, ok2 := operationsCM[condicionOperacion]
-	if !ok2 {
+	opColeccion, ok := operationsCM[condicionOperacion]
+	if !ok {
 		return nil, fmt.Errorf("condición no válida")
 	}
 	//tipo de DTE
@@ -67,7 +58,6 @@ func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, condicionOperacion stri
 
 	//condicion de operacion
 	collectionOp := client.Database("DTE_Recepcion").Collection(opColeccion)
-	//estado
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -84,12 +74,6 @@ func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, condicionOperacion stri
 		return nil, fmt.Errorf("error al realizar la busqueda: %v", err)
 	}
 	defer cursorOp.Close(ctx)
-	//consulta de estado
-	cursorStatus, err := collectionType.Find(ctx, filterStatus)
-	if err != nil {
-		return nil, fmt.Errorf("error al realizar la busqueda: %v", err)
-	}
-	defer cursorStatus.Close(ctx)
 	//decodificacion de resultados para tipo de DTE
 	var resultados []models.Documento
 	if err := cursorType.All(ctx, &resultados); err != nil {
@@ -100,14 +84,8 @@ func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, condicionOperacion stri
 	if err := cursorOp.All(ctx, &resultadosOp); err != nil {
 		return nil, fmt.Errorf("error al decodificar los resultados para condición de operación: %v", err)
 	}
-	// Decodificación de resultados para condición de operación y agregado al slice
-	var resultadosStatus []models.Documento
-	if err := cursorStatus.All(ctx, &resultadosOp); err != nil {
-		return nil, fmt.Errorf("error al decodificar los resultados para condición de operación: %v", err)
-	}
 	//combinando salidas
 	resultados = append(resultados, resultadosOp...)
-	resultados = append(resultados, resultadosStatus...)
 	log.Printf("resultados encontrados: %v\n", resultados)
 	return resultados, nil
 }
@@ -126,24 +104,50 @@ func bytesToPDF(bytes []byte, filename string) error {
 	return ioutil.WriteFile(filename, bytes, 0644)
 }
 
-// Función para obtener datos del PDF por código de generación
-func GetPDFData() {
-	// Reemplaza con el base64 generado
-	base64String := "..."
-
-	// Decodificar base64 a bytes
-	pdfBytes, err := base64ToBytes(base64String)
+// Función para obtener datos del PDF por _id
+func GetPDFDataByID(id string) error {
+	// Obtener la colección directamente dentro de la función
+	client, err := database.ConnectdbMongo()
 	if err != nil {
-		fmt.Println("Error al decodificar base64:", err)
-		return
+		return fmt.Errorf("error al conectar a MongoDB: %v", err)
+	}
+	defer client.Disconnect(context.Background())
+	// Obtener la colección "Archivos"
+	collection := client.Database("DTE_Recepcion").Collection("Archivos")
+
+	// Buscar el documento por _id
+	var documento bson.M
+	err = collection.FindOne(context.Background(), bson.M{"_id": id}).Decode(&documento)
+	if err != nil {
+		return fmt.Errorf("error al buscar el documento: %v", err)
+	}
+
+	// Acceder directamente al campo pdfData y realizar la decodificación
+	pdfData, ok := documento["pdfData"].(string)
+	if !ok {
+		return fmt.Errorf("campo pdfData no encontrado o no es una cadena")
+	}
+
+	pdfBytes, err := base64.StdEncoding.DecodeString(pdfData)
+	if err != nil {
+		return fmt.Errorf("error al decodificar base64: %v", err)
 	}
 
 	// Escribir los bytes en un nuevo archivo PDF
 	err = bytesToPDF(pdfBytes, "nuevo_archivo.pdf")
 	if err != nil {
-		fmt.Println("Error al escribir el archivo PDF:", err)
-		return
+		return fmt.Errorf("error al escribir el archivo PDF: %v", err)
 	}
 
 	fmt.Println("Conversión exitosa. Compara el nuevo_archivo.pdf con el original.")
+	return nil
+}
+
+// Función para obtener datos del PDF por código de generación
+func GetPDFData(id string) {
+	// Llamada a la función GetPDFDataByID con el _id proporcionado
+	err := GetPDFDataByID(id)
+	if err != nil {
+		fmt.Println(err)
+	}
 }

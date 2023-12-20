@@ -4,7 +4,7 @@ import "time"
 
 // Estructura para decodificar el documento JSON
 type Documento struct {
-	ID                string    `json:"_id"`
+	ID                string    `json:"_id" bson:"_id,omitempty"`
 	Filename          string    `json:"filename"`
 	Size              int       `json:"size"`
 	EstadoSeguimiento int       `json:"estadoSeguimiento"`

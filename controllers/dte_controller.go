@@ -44,7 +44,7 @@ func GetDTEs(c *gin.Context, db *gorm.DB) {
 		filterStatusDTE["estadoSeguimiento"] = bson.M{"$gte": estadoDTEParam}
 	}
 	// Consultar MongoDB con el filtro usando el repositorio
-	dtes, err := repositories.GetDTEsByType(filterDTEDate, tipoDTEParam, condicionOperacionParam, filterStatusDTE)
+	dtes, err := repositories.GetDTEsByType(filterDTEDate, tipoDTEParam, condicionOperacionParam, estadoDTEParam)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
