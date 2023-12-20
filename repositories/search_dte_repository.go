@@ -36,7 +36,7 @@ var operationsCM = map[int]string{
 }
 
 // filtrar por tipo de DTE
-func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, condicionOperacion int) ([]models.Documento, error) {
+func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, condicionOperacion int) ([]models.DTE, error) {
 	// Obtener la colección y realizar la búsqueda
 	client, err := database.ConnectdbMongo()
 	if err != nil {
@@ -75,12 +75,12 @@ func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, condicionOperacion int)
 	}
 	defer cursorOp.Close(ctx)
 	//decodificacion de resultados para tipo de DTE
-	var resultados []models.Documento
+	var resultados []models.DTE
 	if err := cursorType.All(ctx, &resultados); err != nil {
 		return nil, fmt.Errorf("error al decodificar los resultados: %v", err)
 	}
 	// Decodificación de resultados para condición de operación y agregado al slice
-	var resultadosOp []models.Documento
+	var resultadosOp []models.DTE
 	if err := cursorOp.All(ctx, &resultadosOp); err != nil {
 		return nil, fmt.Errorf("error al decodificar los resultados para condición de operación: %v", err)
 	}

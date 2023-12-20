@@ -52,13 +52,8 @@ func GetDTEs(c *gin.Context, db *gorm.DB) {
 	//filtro para tipo de DTE
 	if condicionOperacion != 0 {
 		// Accediendo al tipo de pago
-		filterDTEOp["data.resumen.condicionOperacion"] = bson.M{"data.resumen.condicionOperacion": condicionOperacion}
+		filterDTEOp["resumen.condicionOperacion"] = bson.M{"resumen.condicionOperacion": condicionOperacion}
 	}
-	/**
-	filterDTE["$or"] = []bson.M{
-		{"data.identificacion.tipoDte": tipoDTEParam},
-		{"data.resumen.condicionOperacion": condicionOperacion},
-	}*/
 
 	// Consultar MongoDB con el filtro usando el repositorio
 	dtes, err := repositories.GetDTEsByType(filterDTEDate, tipoDTEParam, condicionOperacion)
