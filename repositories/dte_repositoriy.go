@@ -27,9 +27,10 @@ func GuardarArchivoMongo(file *multipart.FileHeader, collection *mongo.Collectio
 	defer fileData.Close()
 
 	doc := bson.M{
-		"filename":   file.Filename,
-		"size":       file.Size,
-		"uploadDate": time.Now(),
+		"filename":          file.Filename,
+		"size":              file.Size,
+		"uploadDate":        time.Now(),
+		"estadoSeguimiento": 1,
 	}
 
 	extension := strings.ToLower(filepath.Ext(file.Filename))

@@ -15,7 +15,7 @@ func GetDTEs(c *gin.Context, db *gorm.DB) {
 
 	// Obtener parámetros de la URL
 	tipoDTEParam := c.Query("tipoDTE")
-	//estadoDTEParam := c.Query("status")
+	estadoDTEParam := c.Query("estadoSeguimiento")
 	fechaInicioParam := c.Query("fechaInicio")
 	fechaFinParam := c.Query("fechaFin")
 	condicionOperacionParam := c.Query("condicionOperacion")
@@ -23,7 +23,7 @@ func GetDTEs(c *gin.Context, db *gorm.DB) {
 	filterDTEType := bson.M{}
 	filterDTEOp := bson.M{}
 	filterDTEDate := bson.M{}
-	//filterStatusDTE := bson.M{}
+	filterStatusDTE := bson.M{}
 	//definiendo valores
 	if fechaInicioParam != "" && fechaFinParam != "" {
 		// Usar notación de puntos para filtrar por fecha dentro del objeto identificacion
@@ -40,11 +40,11 @@ func GetDTEs(c *gin.Context, db *gorm.DB) {
 		// Accediendo al tipo de pago
 		filterDTEOp["data.resumen.condicionOperacion"] = bson.M{"$gte": condicionOperacionParam}
 	}
-	/**	if estadoDTEParam != "" {
-		filterStatusDTE["status"] = bson.M{"$gte": estadoDTEParam}
-	}*/
+	if estadoDTEParam != "" {
+		filterStatusDTE["estadoSeguimiento"] = bson.M{"$gte": estadoDTEParam}
+	}
 	// Consultar MongoDB con el filtro usando el repositorio
-	dtes, err := repositories.GetDTEsByType(filterDTEDate, tipoDTEParam, condicionOperacionParam)
+	dtes, err := repositories.GetDTEsByType(filterDTEDate, tipoDTEParam, condicionOperacionParam, estadoDTEParam)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
