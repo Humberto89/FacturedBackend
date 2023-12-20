@@ -43,7 +43,7 @@ var statusMap = map[string]string{
 }
 
 // filtrar por tipo de DTE
-func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, condicionOperacion string, estado string) ([]models.Documento, error) {
+func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, condicionOperacion string, filterStatus bson.M) ([]models.Documento, error) {
 	// Obtener la colección y realizar la búsqueda
 	client, err := database.ConnectdbMongo()
 	if err != nil {
@@ -56,10 +56,7 @@ func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, condicionOperacion stri
 		return nil, fmt.Errorf("TipoDTE no válido")
 	}
 	//verificar si la condicion de la operacion existe
-	estadoColeccion, ok3 := statusMap[estado]
-	if !ok3 {
-		return nil, fmt.Errorf("condición no válida")
-	}
+
 	//verificar si la condicion de la operacion existe
 	opColeccion, ok2 := operationsCM[condicionOperacion]
 	if !ok2 {
@@ -71,7 +68,6 @@ func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, condicionOperacion stri
 	//condicion de operacion
 	collectionOp := client.Database("DTE_Recepcion").Collection(opColeccion)
 	//estado
-	collectionStatus := client.Database("DTE_Recepcion").Collection(estadoColeccion)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -89,7 +85,7 @@ func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, condicionOperacion stri
 	}
 	defer cursorOp.Close(ctx)
 	//consulta de estado
-	cursorStatus, err := collectionStatus.Find(ctx, filterDTEDate)
+	cursorStatus, err := collectionType.Find(ctx, filterStatus)
 	if err != nil {
 		return nil, fmt.Errorf("error al realizar la busqueda: %v", err)
 	}
