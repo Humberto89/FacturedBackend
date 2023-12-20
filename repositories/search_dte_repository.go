@@ -35,8 +35,15 @@ var operationsCM = map[string]string{
 	"3": "Otro",
 }
 
+/** mapeo de la coleccion del estado
+var statusMap = map[string]string{
+	"1": "INICIADO",
+	"2": "PROCESO",
+	"3": "COMPLETADO",
+}
+*/
 // filtrar por tipo de DTE
-func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, condicionOperacion string) ([]models.DTE, error) {
+func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, condicionOperacion string) ([]models.Documento, error) {
 	// Obtener la colección y realizar la búsqueda
 	client, err := database.ConnectdbMongo()
 	if err != nil {
@@ -44,13 +51,18 @@ func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, condicionOperacion stri
 	}
 
 	// Verificar si el tipoDTE existe en el mapa
-	dteColeccion, ok := collectionMap[tipoDTE]
-	if !ok {
+	dteColeccion, ok1 := collectionMap[tipoDTE]
+	if !ok1 {
 		return nil, fmt.Errorf("TipoDTE no válido")
 	}
 	//verificar si la condicion de la operacion existe
-	opColeccion, ok := operationsCM[condicionOperacion]
-	if !ok {
+	/**estadoColeccion, ok3 := statusMap[estado]
+	if !ok3 {
+		return nil, fmt.Errorf("condición no válida")
+	}*/
+	//verificar si la condicion de la operacion existe
+	opColeccion, ok2 := operationsCM[condicionOperacion]
+	if !ok2 {
 		return nil, fmt.Errorf("condición no válida")
 	}
 	//tipo de DTE
@@ -58,6 +70,8 @@ func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, condicionOperacion stri
 
 	//condicion de operacion
 	collectionOp := client.Database("DTE_Recepcion").Collection(opColeccion)
+	//estado
+	/**collectionStatus := client.Database("DTE_Recepcion").Collection(estadoColeccion)*/
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -74,18 +88,30 @@ func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, condicionOperacion stri
 		return nil, fmt.Errorf("error al realizar la busqueda: %v", err)
 	}
 	defer cursorOp.Close(ctx)
+	//consulta de estado
+	/**cursorStatus, err := collectionStatus.Find(ctx, filterDTEDate)
+	if err != nil {
+		return nil, fmt.Errorf("error al realizar la busqueda: %v", err)
+	}
+	defer cursorStatus.Close(ctx)*/
 	//decodificacion de resultados para tipo de DTE
-	var resultados []models.DTE
+	var resultados []models.Documento
 	if err := cursorType.All(ctx, &resultados); err != nil {
 		return nil, fmt.Errorf("error al decodificar los resultados: %v", err)
 	}
 	// Decodificación de resultados para condición de operación y agregado al slice
-	var resultadosOp []models.DTE
+	var resultadosOp []models.Documento
 	if err := cursorOp.All(ctx, &resultadosOp); err != nil {
 		return nil, fmt.Errorf("error al decodificar los resultados para condición de operación: %v", err)
 	}
+	// Decodificación de resultados para condición de operación y agregado al slice
+	/**var resultadosStatus []models.Documento
+	if err := cursorStatus.All(ctx, &resultadosOp); err != nil {
+		return nil, fmt.Errorf("error al decodificar los resultados para condición de operación: %v", err)
+	}*/
 	//combinando salidas
 	resultados = append(resultados, resultadosOp...)
+	//resultados = append(resultados, resultadosStatus...)
 	log.Printf("resultados encontrados: %v\n", resultados)
 	return resultados, nil
 }

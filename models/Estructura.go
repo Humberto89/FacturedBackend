@@ -4,10 +4,10 @@ import "time"
 
 // Estructura para decodificar el documento JSON
 type Documento struct {
-	ID         string    `json:"_id"`
-	Filename   string    `json:"filename"`
-	Size       int       `json:"size"`
-	Status     int       `json:"status"`
+	ID       string `json:"_id"`
+	Filename string `json:"filename"`
+	Size     int    `json:"size"`
+	//Status     int       `json:"status"`
 	UploadDate time.Time `json:"uploadDate"`
 	Data       Ident     `json:"data"`
 }
