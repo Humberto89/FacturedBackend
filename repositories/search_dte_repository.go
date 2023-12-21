@@ -29,21 +29,21 @@ var collectionMap = map[string]string{
 }
 
 // mapeo de la coleccion de las operaciones
-var operationsCM = map[string]string{
-	"1": "Contado",
-	"2": "A credito",
-	"3": "Otro",
+var operationMap = map[int]string{
+	1: "1",
+	2: "2",
+	3: "3",
 }
 
 // mapeo de la coleccion de las operaciones
-var statusMap = map[string]string{
-	"1": "INICIADO",
-	"2": "PROCESO",
-	"3": "COMPLETO",
+var statusMap = map[int]string{
+	1: "1",
+	2: "2",
+	3: "3",
 }
 
 // filtrar por tipo de DTE
-func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, condicionOperacion string, estadoDTE string) ([]models.Documento, error) {
+func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, condicionOperacion int, estadoDTE int) ([]models.Documento, error) {
 	// Obtener la colección y realizar la búsqueda
 	client, err := database.ConnectdbMongo()
 	if err != nil {
@@ -56,7 +56,7 @@ func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, condicionOperacion stri
 		return nil, fmt.Errorf("TipoDTE no válido")
 	}
 	//verificar si la condicion de la operacion existe
-	opColeccion, ok := operationsCM[condicionOperacion]
+	opColeccion, ok := operationMap[condicionOperacion]
 	if !ok {
 		return nil, fmt.Errorf("condición no válida")
 	}
@@ -70,6 +70,7 @@ func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, condicionOperacion stri
 
 	//condicion de operacion
 	collectionOp := client.Database("DTE_Recepcion").Collection(opColeccion)
+	//estado del DTE
 	collectionStatus := client.Database("DTE_Recepcion").Collection(statusColeccion)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -82,13 +83,13 @@ func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, condicionOperacion stri
 	}
 	defer cursorType.Close(ctx)
 	//consulta de condicion de operacion
-	cursorOp, err := collectionOp.Find(ctx, filterDTEDate)
+	cursorOp, err := collectionOp.Find(ctx, bson.M{"condicionOperacion": condicionOperacion, "data.identificacion.fecEmi": filterDTEDate})
 	if err != nil {
 		return nil, fmt.Errorf("error al realizar la busqueda: %v", err)
 	}
 	defer cursorOp.Close(ctx)
 	//consulta de condicion de operacion
-	cursorSt, err := collectionStatus.Find(ctx, filterDTEDate)
+	cursorSt, err := collectionStatus.Find(ctx, bson.M{"estadoSeguimiento": estadoDTE, "data.identificacion.fecEmi": filterDTEDate})
 	if err != nil {
 		return nil, fmt.Errorf("error al realizar la busqueda: %v", err)
 	}

@@ -4,6 +4,7 @@ package controllers
 import (
 	"Go_Gin/repositories"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -43,8 +44,14 @@ func GetDTEs(c *gin.Context, db *gorm.DB) {
 	if estadoDTEParam != "" {
 		filterStatusDTE["estadoSeguimiento"] = bson.M{"$gte": estadoDTEParam}
 	}
+	//convertir a enteros
+	// Convertir a números enteros
+	condicionOperacion, _ := strconv.Atoi(condicionOperacionParam)
+
+	estadoDTE, _ := strconv.Atoi(estadoDTEParam)
+
 	// Consultar MongoDB con el filtro usando el repositorio
-	dtes, err := repositories.GetDTEsByType(filterDTEDate, tipoDTEParam, condicionOperacionParam, estadoDTEParam)
+	dtes, err := repositories.GetDTEsByType(filterDTEDate, tipoDTEParam, condicionOperacion, estadoDTE)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
