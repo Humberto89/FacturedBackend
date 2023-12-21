@@ -2,15 +2,22 @@ package services
 
 import (
 	"Go_Gin/models"
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"mime/multipart"
+	"net/http"
 	"path/filepath"
 	"strings"
+	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/xeipuuv/gojsonschema"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var ident models.Ident
@@ -141,4 +148,62 @@ func ValidarEstructuraJSON(file *multipart.FileHeader) (bool, string, error) {
 	}
 
 	return isValid, tipoDteTexto, nil
+}
+
+// Pdf representa la estructura del documento en MongoDB
+type Pdf struct {
+	ID       string `json:"_id" bson:"_id"`
+	PdfData  string `json:"pdfData" bson:"pdfData"`
+	Filename string `json:"filename" bson:"filename"`
+	// Agrega más campos según sea necesario
+}
+
+// PdfDataGet busca un documento por _id en MongoDB
+func PdfDataGet(c *gin.Context) {
+	// Inicializar la conexión a MongoDB
+	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+	client, err := mongo.NewClient(clientOptions)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al conectar a MongoDB"})
+		return
+	}
+
+	// Conectar al cliente
+	err = client.Connect(context.Background())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al conectar a MongoDB"})
+		return
+	}
+	defer client.Disconnect(context.Background())
+
+	// Seleccionar la base de datos y la colección
+	db := client.Database("DTE_Recepcion")
+	collection := db.Collection("Archivos")
+
+	// Obtener el parámetro _id de la solicitud
+	_id := c.Param("id")
+
+	// Verificar si el parámetro _id está presente
+	if _id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Parámetro _id faltante"})
+		return
+	}
+
+	// Crear un contexto con timeout para la operación de búsqueda en MongoDB
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Crear un filtro para buscar el documento por _id
+	filter := bson.M{"_id": _id}
+
+	// Realizar la consulta en la base de datos
+	var resultado Pdf
+	err = collection.FindOne(ctx, filter).Decode(&resultado)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Documento no encontrado"})
+		return
+	}
+
+	// Enviar la respuesta en formato JSON
+	c.JSON(http.StatusOK, resultado)
 }
