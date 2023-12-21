@@ -2,6 +2,7 @@ package routes
 
 import (
 	"Go_Gin/controllers"
+	"Go_Gin/services"
 
 	"Go_Gin/repositories"
 	"net/http"
@@ -57,6 +58,9 @@ func SetupRouter(r *gin.Engine, db *gorm.DB) *gin.Engine {
 	r.GET("/pais/:id", func(c *gin.Context) { controllers.GetPaisByID(c, db) })
 	r.GET("/departamento/:id", func(c *gin.Context) { controllers.GetDepartamentoByID(c, db) })
 	r.GET("/reportecompra", controllers.ReporteCompra)
+
+	//Ruta para descargar pdf
+	r.GET("/pdfdataget/:id", func(c *gin.Context) { services.PdfDataGet(c) })
 
 	return r
 }
