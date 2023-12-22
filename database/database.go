@@ -8,6 +8,7 @@ import (
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
+	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -15,6 +16,11 @@ import (
 var collection *mongo.Collection
 
 func CreateDatabase() {
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	// Configuración de conexión a MongoDB
 	mongoURI := os.Getenv("MONGO_URI")
 	clientOptions := options.Client().ApplyURI(mongoURI)
