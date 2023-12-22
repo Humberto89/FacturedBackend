@@ -16,7 +16,7 @@ var collection *mongo.Collection
 
 func CreateDatabase() {
 	// Configuración de conexión a MongoDB
-    mongoURI := os.Getenv("MONGO_URI")
+	mongoURI := os.Getenv("MONGO_URI")
 	clientOptions := options.Client().ApplyURI(mongoURI)
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
@@ -69,7 +69,7 @@ func CreateDatabase() {
 }
 
 func ConnectdbMongo() (*mongo.Client, error) {
-    mongoURI := os.Getenv("MONGO_URI")
+	mongoURI := os.Getenv("MONGO_URI")
 	clientOptions := options.Client().ApplyURI(mongoURI)
 	client, err := mongo.Connect(context.Background(), clientOptions)
 	if err != nil {
@@ -88,7 +88,7 @@ func ConnectdbMongo() (*mongo.Client, error) {
 }
 
 func ConnectdbPostgre() (*gorm.DB, error) {
-    pgURI := fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable", os.Getenv("POSTGRES_HOST"), os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASS"), os.Getenv("PG_DBNAME"))
+	pgURI := fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable", os.Getenv("POSTGRES_HOST"), os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASS"), os.Getenv("POSTGRES_DB_NAME"))
 
 	db, err := gorm.Open("postgres", pgURI)
 	if err != nil {
