@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -15,7 +16,8 @@ var collection *mongo.Collection
 
 func CreateDatabase() {
 	// Configuración de conexión a MongoDB
-	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+    mongoURI := os.Getenv("MONGO_URI")
+	clientOptions := options.Client().ApplyURI(mongoURI)
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
 		log.Fatal(err)
@@ -67,7 +69,8 @@ func CreateDatabase() {
 }
 
 func ConnectdbMongo() (*mongo.Client, error) {
-	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017/")
+    mongoURI := os.Getenv("MONGO_URI")
+	clientOptions := options.Client().ApplyURI(mongoURI)
 	client, err := mongo.Connect(context.Background(), clientOptions)
 	if err != nil {
 		return nil, fmt.Errorf("Error al conectar a MongoDB: %v", err)
@@ -85,7 +88,9 @@ func ConnectdbMongo() (*mongo.Client, error) {
 }
 
 func ConnectdbPostgre() (*gorm.DB, error) {
-	db, err := gorm.Open("postgres", "user=postgres password=B@sanchez93 dbname=DBFormulario sslmode=disable")
+    pgURI := fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable", os.Getenv("POSTGRES_HOST"), os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASS"), os.Getenv("PG_DBNAME"))
+
+	db, err := gorm.Open("postgres", pgURI)
 	if err != nil {
 		return nil, err
 	}
