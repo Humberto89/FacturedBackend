@@ -43,7 +43,7 @@ var statusMap = map[int]string{
 }
 
 // filtrar por tipo de DTE
-func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, condicionOperacion int, estadoDTE int) ([]models.Documento, error) {
+func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, condicionOperacion bson.M, estadoDTE bson.M) ([]models.Documento, error) {
 	// Obtener la colección y realizar la búsqueda
 	client, err := database.ConnectdbMongo()
 	if err != nil {
@@ -55,23 +55,9 @@ func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, condicionOperacion int,
 	if !ok {
 		return nil, fmt.Errorf("TipoDTE no válido")
 	}
-	//verificar si la condicion de la operacion existe
-	opColeccion, ok := operationMap[condicionOperacion]
-	if !ok {
-		return nil, fmt.Errorf("condición no válida")
-	}
-	//verificar si la condicion de la operacion existe
-	statusColeccion, ok := statusMap[estadoDTE]
-	if !ok {
-		return nil, fmt.Errorf("estado no válido")
-	}
+
 	//tipo de DTE
 	collectionType := client.Database("DTE_Recepcion").Collection(dteColeccion)
-
-	//condicion de operacion
-	collectionOp := client.Database("DTE_Recepcion").Collection(opColeccion)
-	//estado del DTE
-	collectionStatus := client.Database("DTE_Recepcion").Collection(statusColeccion)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -83,13 +69,13 @@ func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, condicionOperacion int,
 	}
 	defer cursorType.Close(ctx)
 	//consulta de condicion de operacion
-	cursorOp, err := collectionOp.Find(ctx, bson.M{"condicionOperacion": condicionOperacion, "data.identificacion.fecEmi": filterDTEDate})
+	cursorOp, err := collectionType.Find(ctx, condicionOperacion)
 	if err != nil {
 		return nil, fmt.Errorf("error al realizar la busqueda: %v", err)
 	}
 	defer cursorOp.Close(ctx)
 	//consulta de condicion de operacion
-	cursorSt, err := collectionStatus.Find(ctx, bson.M{"estadoSeguimiento": estadoDTE, "data.identificacion.fecEmi": filterDTEDate})
+	cursorSt, err := collectionType.Find(ctx, estadoDTE)
 	if err != nil {
 		return nil, fmt.Errorf("error al realizar la busqueda: %v", err)
 	}
