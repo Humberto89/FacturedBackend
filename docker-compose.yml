@@ -1,0 +1,57 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: factured_reception_postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    networks:
+      factured_reception_network:
+        ipv4_address: 10.10.0.50
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - local_pgdata:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin4
+    restart: always
+    ports:
+      - "8888:80"
+    networks:
+      factured_reception_network:
+        ipv4_address: 10.10.0.10
+    environment:
+      PGADMIN_DEFAULT_EMAIL: johndoe@mail.com
+      PGADMIN_DEFAULT_PASSWORD: password
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+
+  mongo:
+    image: mongo
+    restart: always
+    ports:
+      - "6379:6379"
+      - '27017:27017'
+    networks:
+      factured_reception_network:
+        ipv4_address: 10.10.0.51
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+
+volumes:
+  local_pgdata:
+  pgadmin-data:
+
+networks:
+  factured_reception_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.10.0.0/16
+          gateway: 10.10.0.1
