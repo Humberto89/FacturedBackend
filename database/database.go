@@ -93,10 +93,10 @@ func ConnectdbMongo() (*mongo.Client, error) {
 }
 
 func ConnectdbPostgre() (*gorm.DB, error) {
-	pgURI := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASS"), os.Getenv("POSTGRES_DB_NAME"))
+	//pgURI := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASS"), os.Getenv("POSTGRES_DB_NAME"))
 
-	db, err := gorm.Open("postgres", pgURI)
-	//db, err := gorm.Open("postgres", "user=recepcion password=R3cepc10n dbname=dbformulario sslmode=disable")
+	//db, err := gorm.Open("postgres", pgURI)
+	db, err := gorm.Open("postgres", "user=postgres password=B@sanchez93 dbname=DBFormulario sslmode=disable")
 
 	if err != nil {
 		return nil, err
