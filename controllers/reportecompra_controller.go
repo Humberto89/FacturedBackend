@@ -7,7 +7,7 @@ import (
 )
 
 // ObtenerArchivosYDatosJSON es el controlador para obtener archivos y extraer datos.
-func ReporteCompra(c *gin.Context) {
+func ReporteAnexo(c *gin.Context) {
 	//colecciones a extraer dte
 	collections := []string{
 		"Nota_de_remision",
@@ -19,5 +19,5 @@ func ReporteCompra(c *gin.Context) {
 		"Factura",
 	}
 
-	repositories.ReporteCompra(c, collections)
+	repositories.ReporteAnexo(c, collections)
 }

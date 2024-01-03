@@ -12,7 +12,7 @@ import (
 )
 
 // ReporteCompra obtiene archivos JSON de MongoDB y extrae datos específicos con paginación.
-func ReporteCompra(c *gin.Context, collections []string) {
+func ReporteAnexo(c *gin.Context, collections []string) {
 	// Conectar a MongoDB
 	client, err := database.ConnectdbMongo()
 	if err != nil {

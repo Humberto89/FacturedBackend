@@ -75,9 +75,8 @@ func CreateDatabase() {
 }
 
 func ConnectdbMongo() (*mongo.Client, error) {
-	mongoURI := os.Getenv("MONGO_URI")
-	clientOptions := options.Client().ApplyURI(mongoURI)
-	client, err := mongo.Connect(context.Background(), clientOptions)
+	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
 		return nil, fmt.Errorf("Error al conectar a MongoDB: %v", err)
 	}
@@ -94,9 +93,11 @@ func ConnectdbMongo() (*mongo.Client, error) {
 }
 
 func ConnectdbPostgre() (*gorm.DB, error) {
-	pgURI := fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable", os.Getenv("POSTGRES_HOST"), os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASS"), os.Getenv("POSTGRES_DB_NAME"))
+	//pgURI := fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable", os.Getenv("POSTGRES_HOST"), os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASS"), os.Getenv("POSTGRES_DB_NAME"))
 
-	db, err := gorm.Open("postgres", pgURI)
+	//db, err := gorm.Open("postgres", pgURI)
+	db, err := gorm.Open("postgres", "user=postgres password=B@sanchez93 dbname=DBFormulario sslmode=disable")
+
 	if err != nil {
 		return nil, err
 	}
