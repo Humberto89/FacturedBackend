@@ -2,11 +2,13 @@ module Go_Gin
 
 go 1.21.3
 
-require github.com/xeipuuv/gojsonschema v1.2.0
+require (
+	github.com/joho/godotenv v1.5.1
+	github.com/xeipuuv/gojsonschema v1.2.0
+)
 
 require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
-	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/lib/pq v1.10.9 // indirect
 )
 
