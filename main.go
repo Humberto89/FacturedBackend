@@ -5,12 +5,17 @@ import (
 	"Go_Gin/migrations"
 	"Go_Gin/routes"
 	"fmt"
+	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
 	//Inicializacion de conexcion a postgre
+	if err := godotenv.Load(); err != nil {
+		log.Fatal("Error al cargar archivo .env")
+	}
 	db, err := database.ConnectdbPostgre()
 	if err != nil {
 		fmt.Println("Error al conectar a la base de datos:", err.Error())
