@@ -39,7 +39,7 @@ func SetupRouter(r *gin.Engine, db *gorm.DB) *gin.Engine {
 	r.GET("/municipio/:id", func(c *gin.Context) { controllers.GetMunicipioByID(c, db) })
 	r.GET("/pais/:id", func(c *gin.Context) { controllers.GetPaisByID(c, db) })
 	r.GET("/departamento/:id", func(c *gin.Context) { controllers.GetDepartamentoByID(c, db) })
-	r.GET("/reporteanexo", controllers.ReporteAnexo)
+	r.GET("/reportecompra", controllers.ReporteAnexo)
 
 	//Ruta para descargar pdf
 	r.GET("/pdfdataget/:id", func(c *gin.Context) { services.PdfDataGet(c) })
