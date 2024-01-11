@@ -13,7 +13,7 @@ func SetupRouter(r *gin.Engine, db *gorm.DB) *gin.Engine {
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
 	config.AllowMethods = []string{"GET", "POST", "PUT", "OPTIONS", "DELETE"}
-	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Allow-Methods", "Allow-Headers", "Expose-Headers"}
+	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Allow-Methods", "Allow-Headers", "Expose-Headers", "IdentifierEmp"}
 	config.ExposeHeaders = []string{"Content-Length"}
 
 	r.Use(cors.New(config))
