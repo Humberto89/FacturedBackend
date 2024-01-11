@@ -28,7 +28,7 @@ var collectionMap = map[string]string{
 }
 
 // Filtrar por tipo de DTE, estadoDTE y condicionOperacion
-func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, fechaInicio string, fechaFin string, condicionOperacion string, estadoDTE string) ([]models.Documento, error) {
+func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, fechaInicio string, fechaFin string, condicionOperacion string, estadoDTE string, identifierEmp string) ([]models.Documento, error) {
 	// Obtener la colección y realizar la búsqueda
 	client, err := database.ConnectdbMongo()
 	if err != nil {
@@ -78,6 +78,8 @@ func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, fechaInicio string, fec
 	}
 
 	log.Printf("Filtro aplicado: %v\n", filterDTEDate)
+
+	filterDTEDate["EmpID"] = identifierEmp
 
 	// Consultar MongoDB con el filtro
 	cursorType, err := collectionType.Find(ctx, filterDTEDate)

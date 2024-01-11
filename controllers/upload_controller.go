@@ -14,6 +14,8 @@ import (
 )
 
 func FilesUpload(c *gin.Context) {
+	IdentifierEmp := c.GetHeader("IdentifierEmp")
+
 	client, err := database.ConnectdbMongo()
 	if err != nil {
 		log.Fatal(err)
@@ -63,7 +65,7 @@ func FilesUpload(c *gin.Context) {
 
 		}
 
-		fileID, err := repositories.GuardarArchivoMongo(file, collection)
+		fileID, err := repositories.GuardarArchivoMongo(file, collection, IdentifierEmp)
 		if err != nil {
 			filesError = append(filesError, gin.H{
 				"filename": file.Filename,
