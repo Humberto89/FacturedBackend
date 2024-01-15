@@ -13,6 +13,12 @@ import (
 
 // ReporteCompra obtiene archivos JSON de MongoDB y extrae datos específicos con paginación.
 func ReporteAnexo(c *gin.Context, collections []string) {
+	identifierEmp := c.GetHeader("IdentifierEmp")
+	if identifierEmp == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "IdentifierEmp no proporcionado en el encabezado"})
+		return
+	}
+
 	// Conectar a MongoDB
 	client, err := database.ConnectdbMongo()
 	if err != nil {
@@ -35,8 +41,10 @@ func ReporteAnexo(c *gin.Context, collections []string) {
 
 		collection := database.Collection(col)
 
+		filter := bson.M{"EmpID": identifierEmp}
+
 		// Consultar todos los documentos en la colección actual
-		cursor, err := collection.Find(context.Background(), bson.M{})
+		cursor, err := collection.Find(context.Background(), filter)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Error al consultar la colección: %v", err)})
 			return
@@ -46,15 +54,17 @@ func ReporteAnexo(c *gin.Context, collections []string) {
 		// Procesar documentos y extraer datos
 		var documents []bson.M
 		if err := cursor.All(context.Background(), &documents); err != nil {
-			// Manejar error
+			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Error al procesar documentos: %v", err)})
+			return
 		}
 
 		allDocuments = append(allDocuments, documents...)
 
 		// Contar documentos en la colección actual y sumar al totalRows
-		count, err := collection.CountDocuments(context.Background(), bson.M{})
+		count, err := collection.CountDocuments(context.Background(), filter)
 		if err != nil {
-			// Manejar error
+			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Error al contar documentos: %v", err)})
+			return
 		}
 		totalRows += count
 	}

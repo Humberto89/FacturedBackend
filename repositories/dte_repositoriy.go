@@ -15,7 +15,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func GuardarArchivoMongo(file *multipart.FileHeader, collection *mongo.Collection) (string, error) {
+func GuardarArchivoMongo(file *multipart.FileHeader, collection *mongo.Collection, identifierEmp string) (string, error) {
 	if !services.ExtensionValor(file.Filename) {
 		return "", fmt.Errorf("tipo de archivo no permitido, solo se permiten archivos .json y .pdf")
 	}
@@ -31,6 +31,7 @@ func GuardarArchivoMongo(file *multipart.FileHeader, collection *mongo.Collectio
 		"size":              file.Size,
 		"uploadDate":        time.Now(),
 		"estadoSeguimiento": 1,
+		"EmpID":             identifierEmp,
 	}
 
 	extension := strings.ToLower(filepath.Ext(file.Filename))

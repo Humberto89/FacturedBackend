@@ -18,9 +18,21 @@ import (
 
 func GetFormulario(c *gin.Context, db *gorm.DB) {
 	var formularios []models.Formulario
-	if err := db.Preload("Pais").Preload("Departamento").Preload("Municipio").Find(&formularios).Error; err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
-		return
+
+	identifierEmp := c.GetHeader("IdentifierEmp")
+
+	// Aplicar el filtro si se proporciona
+	if identifierEmp != "" {
+		if err := db.Preload("Pais").Preload("Departamento").Preload("Municipio").
+			Where("emp_id = ?", identifierEmp).Find(&formularios).Error; err != nil {
+			c.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
+	} else {
+		if err := db.Preload("Pais").Preload("Departamento").Preload("Municipio").Find(&formularios).Error; err != nil {
+			c.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
 	}
 	c.JSON(200, formularios)
 }
@@ -28,10 +40,20 @@ func GetFormulario(c *gin.Context, db *gorm.DB) {
 func GetFormularioByID(c *gin.Context, db *gorm.DB) {
 	var formulario models.Formulario
 	id := c.Param("id")
-	if err := db.Preload("Pais").Preload("Departamento").Preload("Municipio").First(&formulario, id).Error; err != nil {
+
+	identifierEmp := c.GetHeader("IdentifierEmp")
+
+	// Aplicar el filtro si se proporciona
+	query := db.Preload("Pais").Preload("Departamento").Preload("Municipio")
+	if identifierEmp != "" {
+		query = query.Where("emp_id = ?", identifierEmp)
+	}
+
+	if err := query.First(&formulario, id).Error; err != nil {
 		c.JSON(404, gin.H{"error": "Formulario not found"})
 		return
 	}
+
 	c.JSON(200, formulario)
 }
 
@@ -115,6 +137,8 @@ func CreateFormulario(c *gin.Context, db *gorm.DB) {
 
 	// Después de la verificación de existencia para DUI y NIT
 	fmt.Printf("Attempting to create Formulario with DUI: %s, NIT: %s\n", formulario.Dui, formulario.NIT)
+
+	formulario.EmpID = c.GetHeader("IdentifierEmp")
 
 	if err := db.Create(&formulario).Error; err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})

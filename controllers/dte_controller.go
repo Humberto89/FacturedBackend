@@ -18,6 +18,7 @@ func GetDTEs(c *gin.Context, db *gorm.DB) {
 	fechaInicioParam := c.Query("fechaInicio")
 	fechaFinParam := c.Query("fechaFin")
 	condicionOperacionParam := c.Query("condicionOperacion")
+	identifierEmp := c.GetHeader("IdentifierEmp")
 
 	// Construir filtros para la consulta
 	filterDTEDate := bson.M{}
@@ -29,7 +30,7 @@ func GetDTEs(c *gin.Context, db *gorm.DB) {
 	}
 
 	// Obtener todos los documentos de la colección específica
-	dtes, err := repositories.GetDTEsByType(filterDTEDate, tipoDTEParam, fechaInicioParam, fechaFinParam, condicionOperacionParam, estadoDTEParam)
+	dtes, err := repositories.GetDTEsByType(filterDTEDate, tipoDTEParam, fechaInicioParam, fechaFinParam, condicionOperacionParam, estadoDTEParam, identifierEmp)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
