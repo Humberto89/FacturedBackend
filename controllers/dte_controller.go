@@ -12,6 +12,16 @@ import (
 
 // Controlador para obtener DTEs según parámetros de la URL
 func GetDTEs(c *gin.Context, db *gorm.DB) {
+	// Obtener el token del encabezado
+	token := c.GetHeader("Authorization")
+
+	// Validar el token
+	if err := ValidateToken(token); err != nil {
+		// Manejar el error, por ejemplo, enviar una respuesta de error al cliente
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
 	// Obtener parámetros de la URL
 	tipoDTEParam := c.Query("tipoDTE")
 	estadoDTEParam := c.Query("estadoSeguimiento")

@@ -2,7 +2,6 @@ package routes
 
 import (
 	"Go_Gin/controllers"
-	"Go_Gin/services"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -13,10 +12,20 @@ func SetupRouter(r *gin.Engine, db *gorm.DB) *gin.Engine {
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
 	config.AllowMethods = []string{"GET", "POST", "PUT", "OPTIONS", "DELETE"}
-	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Allow-Methods", "Allow-Headers", "Expose-Headers", "IdentifierEmp"}
-	config.ExposeHeaders = []string{"Content-Length"}
+	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "IdentifierEmp", "Authorization", "Access-Control-Allow-Origin"}
+	// Habilita el uso de credenciales en las solicitudes CORS (si es necesario)
+	config.AllowCredentials = true
 
 	r.Use(cors.New(config))
+
+	// r.OPTIONS("/*any", func(c *gin.Context) {
+	// 	c.Header("Access-Control-Allow-Origin", "*")
+	// 	c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+	// 	c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Content-Length, IdentifierEmp, Authorization")
+	// 	c.Header("Access-Control-Allow-Credentials", "true")
+
+	// 	c.Status(204)
+	// })
 
 	//Ruta para recepcion DTE
 	r.POST("/upload", func(c *gin.Context) { controllers.FilesUpload(c) })
@@ -42,7 +51,7 @@ func SetupRouter(r *gin.Engine, db *gorm.DB) *gin.Engine {
 	r.GET("/reporteanexo", controllers.ReporteAnexo)
 
 	//Ruta para descargar pdf
-	r.GET("/pdfdataget/:id", func(c *gin.Context) { services.PdfDataGet(c) })
+	r.GET("/pdfdataget/:id", func(c *gin.Context) { controllers.PdfDataGet(c) })
 
 	return r
 }
