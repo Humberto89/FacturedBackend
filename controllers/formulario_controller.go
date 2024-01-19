@@ -3,6 +3,7 @@ package controllers
 
 import (
 	"Go_Gin/models"
+	"Go_Gin/services"
 
 	"errors"
 	"fmt"
@@ -29,7 +30,13 @@ func GetFormulario(c *gin.Context, db *gorm.DB) {
 
 	var formularios []models.Formulario
 
-	identifierEmp := c.GetHeader("IdentifierEmp")
+	// Extraer el campo groupsid del token
+	identifierEmp, err := services.ExtraerIdEmpr(token)
+	if err != nil {
+		// Manejar el error, por ejemplo, enviar una respuesta de error al cliente
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 	// Aplicar el filtro si se proporciona
 	if identifierEmp != "" {
 		if err := db.Preload("Pais").Preload("Departamento").Preload("Municipio").
@@ -60,7 +67,13 @@ func GetFormularioByID(c *gin.Context, db *gorm.DB) {
 	var formulario models.Formulario
 	id := c.Param("id")
 
-	identifierEmp := c.GetHeader("IdentifierEmp")
+	// Extraer el campo groupsid del token
+	identifierEmp, err := services.ExtraerIdEmpr(token)
+	if err != nil {
+		// Manejar el error, por ejemplo, enviar una respuesta de error al cliente
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
 	// Aplicar el filtro si se proporciona
 	query := db.Preload("Pais").Preload("Departamento").Preload("Municipio")
@@ -167,7 +180,15 @@ func CreateFormulario(c *gin.Context, db *gorm.DB) {
 	// Después de la verificación de existencia para DUI y NIT
 	fmt.Printf("Attempting to create Formulario with DUI: %s, NIT: %s\n", formulario.Dui, formulario.NIT)
 
-	formulario.EmpID = c.GetHeader("IdentifierEmp")
+	// Extraer el campo groupsid del token
+	identifierEmp, err := services.ExtraerIdEmpr(token)
+	if err != nil {
+		// Manejar el error, por ejemplo, enviar una respuesta de error al cliente
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	formulario.EmpID = identifierEmp
 
 	if err := db.Create(&formulario).Error; err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
@@ -189,7 +210,14 @@ func UpdateFormulario(c *gin.Context, db *gorm.DB) {
 
 	id := c.Param("id")
 	var formulario models.Formulario
-	identifierEmp := c.GetHeader("IdentifierEmp")
+
+	// Extraer el campo groupsid del token
+	identifierEmp, err := services.ExtraerIdEmpr(token)
+	if err != nil {
+		// Manejar el error, por ejemplo, enviar una respuesta de error al cliente
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
 	// Aplicar el filtro si se proporciona
 	query := db
@@ -237,7 +265,13 @@ func DeleteFormulario(c *gin.Context, db *gorm.DB) {
 	}
 
 	var formulario models.Formulario
-	identifierEmp := c.GetHeader("IdentifierEmp")
+	// Extraer el campo groupsid del token
+	identifierEmp, err := services.ExtraerIdEmpr(token)
+	if err != nil {
+		// Manejar el error, por ejemplo, enviar una respuesta de error al cliente
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
 	// Verificar si el formulario existe y si el emp_id coincide
 	if err := db.Where("id = ? AND emp_id = ?", ID, identifierEmp).First(&formulario).Error; err != nil {

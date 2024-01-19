@@ -85,14 +85,14 @@ func ValidarEstructuraJSON(file *multipart.FileHeader) (bool, string, error) {
 	// Abrir el archivo original recibido
 	originalFile, err := file.Open()
 	if err != nil {
-		return false, "", fmt.Errorf("Error al abrir el archivo original: %v", err)
+		return false, "", fmt.Errorf("error al abrir el archivo original: %v", err)
 	}
 	defer originalFile.Close()
 
 	// Leer el contenido del archivo JSON
 	dataBytes, err := ioutil.ReadAll(originalFile)
 	if err != nil {
-		return false, "", fmt.Errorf("Error al leer el contenido del archivo JSON: %v", err)
+		return false, "", fmt.Errorf("error al leer el contenido del archivo JSON: %v", err)
 	}
 
 	// Cargar los datos que se desea validar desde el contenido del archivo JSON
@@ -118,7 +118,7 @@ func ValidarEstructuraJSON(file *multipart.FileHeader) (bool, string, error) {
 	for _, schemaPath := range schemaPaths {
 		schemaPath, err := filepath.Abs(schemaPath)
 		if err != nil {
-			return false, "", fmt.Errorf("Error al obtener la ruta absoluta para el esquema: %v", err)
+			return false, "", fmt.Errorf("error al obtener la ruta absoluta para el esquema: %v", err)
 		}
 
 		// Cargar el esquema desde un archivo JSON
@@ -127,14 +127,14 @@ func ValidarEstructuraJSON(file *multipart.FileHeader) (bool, string, error) {
 		// Validar los datos contra el esquema
 		result, err := gojsonschema.Validate(schemaLoader, dataLoader)
 		if err != nil {
-			return false, "", fmt.Errorf("Error al validar: %v", err)
+			return false, "", fmt.Errorf("error al validar: %v", err)
 		}
 
 		if result.Valid() {
 			// Decodificar el JSON para obtener el campo TipoDte
 			// var data Documento
 			if err := json.Unmarshal(dataBytes, &ident); err != nil {
-				return false, "", fmt.Errorf("Error al decodificar el JSON: %v", err)
+				return false, "", fmt.Errorf("error al decodificar el JSON: %v", err)
 			}
 
 			// Obtener el tipoDte del documento
@@ -206,4 +206,32 @@ func PdfDataGet(c *gin.Context) {
 
 	// Enviar la respuesta en formato JSON
 	c.JSON(http.StatusOK, resultado)
+}
+
+func ExtraerIdEmpr(tokenString string) (string, error) {
+	// Verificar y quitar el prefijo "Bearer "
+	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
+
+	// Procesar el token como antes
+	parts := strings.Split(tokenString, ".")
+	if len(parts) != 3 {
+		return "", fmt.Errorf("Token no válido")
+	}
+
+	decodedPayload, err := base64.RawURLEncoding.DecodeString(parts[1])
+	if err != nil {
+		return "", fmt.Errorf("Error al decodificar el payload: %v", err)
+	}
+
+	var claims map[string]interface{}
+	if err := json.Unmarshal(decodedPayload, &claims); err != nil {
+		return "", fmt.Errorf("Error al decodificar el payload JSON: %v", err)
+	}
+
+	groupID, ok := claims["groupsid"].(string)
+	if !ok {
+		return "", fmt.Errorf("Campo 'groupsid' no encontrado en los claims")
+	}
+
+	return groupID, nil
 }

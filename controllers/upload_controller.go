@@ -24,7 +24,13 @@ func FilesUpload(c *gin.Context) {
 		return
 	}
 
-	IdentifierEmp := c.GetHeader("IdentifierEmp")
+	// Extraer el campo groupsid del token
+	IdentifierEmp, err := services.ExtraerIdEmpr(token)
+	if err != nil {
+		// Manejar el error, por ejemplo, enviar una respuesta de error al cliente
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
 	client, err := database.ConnectdbMongo()
 	if err != nil {

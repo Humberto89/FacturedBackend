@@ -18,15 +18,6 @@ func SetupRouter(r *gin.Engine, db *gorm.DB) *gin.Engine {
 
 	r.Use(cors.New(config))
 
-	// r.OPTIONS("/*any", func(c *gin.Context) {
-	// 	c.Header("Access-Control-Allow-Origin", "*")
-	// 	c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-	// 	c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Content-Length, IdentifierEmp, Authorization")
-	// 	c.Header("Access-Control-Allow-Credentials", "true")
-
-	// 	c.Status(204)
-	// })
-
 	//Ruta para recepcion DTE
 	r.POST("/upload", func(c *gin.Context) { controllers.FilesUpload(c) })
 	//=================================================================//
