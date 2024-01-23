@@ -64,4 +64,5 @@ type Formulario struct {
 	ExtentoType          string
 	RazonSocial          string `gorm:"not null"`
 	NombreComercial      string `gorm:"not null"`
+	EmpID                string
 }
