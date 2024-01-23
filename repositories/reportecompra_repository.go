@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"Go_Gin/database"
+	"Go_Gin/services"
 	"context"
 	"fmt"
 	"net/http"
@@ -13,9 +14,12 @@ import (
 
 // ReporteCompra obtiene archivos JSON de MongoDB y extrae datos específicos con paginación.
 func ReporteAnexo(c *gin.Context, collections []string) {
-	identifierEmp := c.GetHeader("IdentifierEmp")
-	if identifierEmp == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "IdentifierEmp no proporcionado en el encabezado"})
+	token := c.GetHeader("Authorization")
+	// Extraer el campo groupsid del token
+	identifierEmp, err := services.ExtraerIdEmpr(token)
+	if err != nil {
+		// Manejar el error, por ejemplo, enviar una respuesta de error al cliente
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 

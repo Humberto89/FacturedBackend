@@ -3,6 +3,7 @@ package controllers
 
 import (
 	"Go_Gin/models"
+	"Go_Gin/services"
 
 	"errors"
 	"fmt"
@@ -17,10 +18,25 @@ import (
 // Manejadores CRUD para Formulario
 
 func GetFormulario(c *gin.Context, db *gorm.DB) {
+	// Obtener el token del encabezado
+	token := c.GetHeader("Authorization")
+
+	// Validar el token
+	if err := ValidateToken(token); err != nil {
+		// Manejar el error, por ejemplo, enviar una respuesta de error al cliente
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
 	var formularios []models.Formulario
 
-	identifierEmp := c.GetHeader("IdentifierEmp")
-
+	// Extraer el campo groupsid del token
+	identifierEmp, err := services.ExtraerIdEmpr(token)
+	if err != nil {
+		// Manejar el error, por ejemplo, enviar una respuesta de error al cliente
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 	// Aplicar el filtro si se proporciona
 	if identifierEmp != "" {
 		if err := db.Preload("Pais").Preload("Departamento").Preload("Municipio").
@@ -38,10 +54,26 @@ func GetFormulario(c *gin.Context, db *gorm.DB) {
 }
 
 func GetFormularioByID(c *gin.Context, db *gorm.DB) {
+	// Obtener el token del encabezado
+	token := c.GetHeader("Authorization")
+
+	// Validar el token
+	if err := ValidateToken(token); err != nil {
+		// Manejar el error, por ejemplo, enviar una respuesta de error al cliente
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
 	var formulario models.Formulario
 	id := c.Param("id")
 
-	identifierEmp := c.GetHeader("IdentifierEmp")
+	// Extraer el campo groupsid del token
+	identifierEmp, err := services.ExtraerIdEmpr(token)
+	if err != nil {
+		// Manejar el error, por ejemplo, enviar una respuesta de error al cliente
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
 	// Aplicar el filtro si se proporciona
 	query := db.Preload("Pais").Preload("Departamento").Preload("Municipio")
@@ -117,6 +149,16 @@ func isIdentificationExists(db *gorm.DB, idType string, idValue string) bool {
 }
 
 func CreateFormulario(c *gin.Context, db *gorm.DB) {
+	// Obtener el token del encabezado
+	token := c.GetHeader("Authorization")
+
+	// Validar el token
+	if err := ValidateToken(token); err != nil {
+		// Manejar el error, por ejemplo, enviar una respuesta de error al cliente
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
 	var formulario models.Formulario
 	if err := c.BindJSON(&formulario); err != nil {
 		c.JSON(400, gin.H{"error": "Invalid data"})
@@ -138,7 +180,15 @@ func CreateFormulario(c *gin.Context, db *gorm.DB) {
 	// Después de la verificación de existencia para DUI y NIT
 	fmt.Printf("Attempting to create Formulario with DUI: %s, NIT: %s\n", formulario.Dui, formulario.NIT)
 
-	formulario.EmpID = c.GetHeader("IdentifierEmp")
+	// Extraer el campo groupsid del token
+	identifierEmp, err := services.ExtraerIdEmpr(token)
+	if err != nil {
+		// Manejar el error, por ejemplo, enviar una respuesta de error al cliente
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	formulario.EmpID = identifierEmp
 
 	if err := db.Create(&formulario).Error; err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
@@ -148,40 +198,94 @@ func CreateFormulario(c *gin.Context, db *gorm.DB) {
 }
 
 func UpdateFormulario(c *gin.Context, db *gorm.DB) {
+	// Obtener el token del encabezado
+	token := c.GetHeader("Authorization")
+
+	// Validar el token
+	if err := ValidateToken(token); err != nil {
+		// Manejar el error, por ejemplo, enviar una respuesta de error al cliente
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
 	id := c.Param("id")
 	var formulario models.Formulario
-	if err := db.First(&formulario, id).Error; err != nil {
+
+	// Extraer el campo groupsid del token
+	identifierEmp, err := services.ExtraerIdEmpr(token)
+	if err != nil {
+		// Manejar el error, por ejemplo, enviar una respuesta de error al cliente
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Aplicar el filtro si se proporciona
+	query := db
+	if identifierEmp != "" {
+		query = query.Where("emp_id = ?", identifierEmp)
+	}
+
+	if err := query.First(&formulario, id).Error; err != nil {
 		c.JSON(404, gin.H{"error": "Formulario not found"})
 		return
 	}
+
 	if err := c.BindJSON(&formulario); err != nil {
 		c.JSON(400, gin.H{"error": "Invalid data"})
 		return
 	}
+
 	if err := db.Save(&formulario).Error; err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
+
 	c.JSON(200, formulario)
 }
 
 func DeleteFormulario(c *gin.Context, db *gorm.DB) {
+	// Obtener el token del encabezado
+	token := c.GetHeader("Authorization")
+
+	// Validar el token
+	if err := ValidateToken(token); err != nil {
+		// Manejar el error, por ejemplo, enviar una respuesta de error al cliente
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
 	id := c.Param("id")
 	fmt.Println("Intento de eliminación para el ID:", id)
 
-	// Convertir el ID de cadena a un tipo numérico (ajusta el tipo según tu modelo)
+	// Convertir el ID de cadena a un tipo numérico (ajustar el tipo según tu modelo)
 	ID, err := strconv.Atoi(id)
 	if err != nil {
 		c.JSON(400, gin.H{"error": "Invalid ID"})
 		return
 	}
 
-	if err := db.Delete(models.Formulario{}, ID).Error; err != nil {
+	var formulario models.Formulario
+	// Extraer el campo groupsid del token
+	identifierEmp, err := services.ExtraerIdEmpr(token)
+	if err != nil {
+		// Manejar el error, por ejemplo, enviar una respuesta de error al cliente
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Verificar si el formulario existe y si el emp_id coincide
+	if err := db.Where("id = ? AND emp_id = ?", ID, identifierEmp).First(&formulario).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(404, gin.H{"error": "Formulario not found"})
 			return
 		}
 
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Eliminar el formulario
+	if err := db.Delete(&formulario).Error; err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
