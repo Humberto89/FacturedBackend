@@ -14,6 +14,24 @@ import (
 )
 
 func FilesUpload(c *gin.Context) {
+	// Obtener el token del encabezado
+	token := c.GetHeader("Authorization")
+
+	// Validar el token
+	if err := ValidateToken(token); err != nil {
+		// Manejar el error, por ejemplo, enviar una respuesta de error al cliente
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Extraer el campo groupsid del token
+	IdentifierEmp, err := services.ExtraerIdEmpr(token)
+	if err != nil {
+		// Manejar el error, por ejemplo, enviar una respuesta de error al cliente
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
 	client, err := database.ConnectdbMongo()
 	if err != nil {
 		log.Fatal(err)
@@ -63,7 +81,7 @@ func FilesUpload(c *gin.Context) {
 
 		}
 
-		fileID, err := repositories.GuardarArchivoMongo(file, collection)
+		fileID, err := repositories.GuardarArchivoMongo(file, collection, IdentifierEmp)
 		if err != nil {
 			filesError = append(filesError, gin.H{
 				"filename": file.Filename,

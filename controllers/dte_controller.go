@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"Go_Gin/repositories"
+	"Go_Gin/services"
 	"log"
 	"net/http"
 
@@ -12,6 +13,24 @@ import (
 
 // Controlador para obtener DTEs según parámetros de la URL
 func GetDTEs(c *gin.Context, db *gorm.DB) {
+	// Obtener el token del encabezado
+	token := c.GetHeader("Authorization")
+
+	// Validar el token
+	if err := ValidateToken(token); err != nil {
+		// Manejar el error, por ejemplo, enviar una respuesta de error al cliente
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Extraer el campo groupsid del token
+	identifierEmp, err := services.ExtraerIdEmpr(token)
+	if err != nil {
+		// Manejar el error, por ejemplo, enviar una respuesta de error al cliente
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
 	// Obtener parámetros de la URL
 	tipoDTEParam := c.Query("tipoDTE")
 	estadoDTEParam := c.Query("estadoSeguimiento")
@@ -29,7 +48,7 @@ func GetDTEs(c *gin.Context, db *gorm.DB) {
 	}
 
 	// Obtener todos los documentos de la colección específica
-	dtes, err := repositories.GetDTEsByType(filterDTEDate, tipoDTEParam, fechaInicioParam, fechaFinParam, condicionOperacionParam, estadoDTEParam)
+	dtes, err := repositories.GetDTEsByType(filterDTEDate, tipoDTEParam, fechaInicioParam, fechaFinParam, condicionOperacionParam, estadoDTEParam, identifierEmp)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
