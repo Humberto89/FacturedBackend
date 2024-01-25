@@ -3,6 +3,7 @@ package controllers
 import (
 	"Go_Gin/database"
 	"Go_Gin/repositories"
+	"Go_Gin/services"
 	"context"
 	"fmt"
 	"log"
@@ -16,13 +17,30 @@ import (
 
 // Controlador para obtener DTEs según parámetros de la URL
 func GetDTEs(c *gin.Context, db *gorm.DB) {
+	// Obtener el token del encabezado
+	token := c.GetHeader("Authorization")
+
+	// Validar el token
+	if err := ValidateToken(token); err != nil {
+		// Manejar el error, por ejemplo, enviar una respuesta de error al cliente
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Extraer el campo groupsid del token
+	identifierEmp, err := services.ExtraerIdEmpr(token)
+	if err != nil {
+		// Manejar el error, por ejemplo, enviar una respuesta de error al cliente
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
 	// Obtener parámetros de la URL
 	tipoDTEParam := c.Query("tipoDTE")
 	estadoDTEParam := c.Query("estadoSeguimiento")
 	fechaInicioParam := c.Query("fechaInicio")
 	fechaFinParam := c.Query("fechaFin")
 	condicionOperacionParam := c.Query("condicionOperacion")
-	identifierEmp := c.GetHeader("IdentifierEmp")
 
 	// Construir filtros para la consulta
 	filterDTEDate := bson.M{}
