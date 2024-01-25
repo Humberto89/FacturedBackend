@@ -119,6 +119,12 @@ func HandleActualizarEstadoSeguimiento(c *gin.Context) {
 	// Seleccionar la colección
 	mongoCollection := client.Database("DTE_Recepcion").Collection(collection)
 
+	// Verificar si la opción está en el rango permitido (1 al 3)
+	if nuevoEstado < 1 || nuevoEstado > 3 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Estado de seguimiento invalido. Debe estar en el rango de 1 al 3"})
+		return
+	}
+
 	// Crear el filtro para encontrar el documento por ID
 	filter := bson.D{{Key: "_id", Value: id}}
 
