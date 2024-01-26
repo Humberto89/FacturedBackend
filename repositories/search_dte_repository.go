@@ -67,7 +67,7 @@ func GetDTEsByType(filterDTEDate bson.M, tipoDTE string, fechaInicio string, fec
 	}
 
 	// Aplicar filtro de condicionOperacion si se proporciona
-	if condicionOperacion != "" {
+	if condicionOperacion != "" && tipoDTE != "15" && tipoDTE != "04" {
 		// Convierte el valor de condicionOperacion a int
 		condicionOperacionInt, err := strconv.Atoi(condicionOperacion)
 		if err != nil {
