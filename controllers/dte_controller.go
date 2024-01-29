@@ -78,6 +78,24 @@ var collectionMap = map[string]string{
 
 // Función para manejar la solicitud y actualizar el estadoSeguimiento
 func HandleActualizarEstadoSeguimiento(c *gin.Context) {
+	// Obtener el token del encabezado
+	token := c.GetHeader("Authorization")
+
+	// Validar el token
+	if err := ValidateToken(token); err != nil {
+		// Manejar el error, por ejemplo, enviar una respuesta de error al cliente
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Extraer el campo groupsid del token
+	identifierEmp, err := services.ExtraerIdEmpr(token)
+	if err != nil {
+		// Manejar el error, por ejemplo, enviar una respuesta de error al cliente
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
 	// Parsear los parámetros de la URL
 	id := c.Query("id")
 	opcion := c.Query("opcion")
@@ -125,9 +143,11 @@ func HandleActualizarEstadoSeguimiento(c *gin.Context) {
 		return
 	}
 
-	// Crear el filtro para encontrar el documento por ID
-	filter := bson.D{{Key: "_id", Value: id}}
-
+	// Crear el filtro para encontrar el documento por ID y IdentifierEmp
+	filter := bson.D{
+		{Key: "_id", Value: id},
+		{Key: "EmpID", Value: identifierEmp},
+	}
 	// Crear la actualización para modificar el estadoSeguimiento
 	update := bson.D{{Key: "$set", Value: bson.D{{Key: "estadoSeguimiento", Value: nuevoEstado}}}}
 
