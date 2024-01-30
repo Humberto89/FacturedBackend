@@ -20,6 +20,7 @@ func SetupRouter(r *gin.Engine, db *gorm.DB) *gin.Engine {
 
 	//Ruta para recepcion DTE
 	r.POST("/upload", func(c *gin.Context) { controllers.FilesUpload(c) })
+	r.PUT("/updateDte", func(c *gin.Context) { controllers.HandleActualizarEstadoSeguimiento(c) })
 	//=================================================================//
 
 	// Rutas para el CRUD de Inscripcion de provedores

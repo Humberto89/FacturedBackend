@@ -35,4 +35,4 @@ jobs:
       run: go build -v ./
 
     - name: Restart service
-      run: systemctl restart factured-reception-backend.service
+      run: systemctl --user restart factured-reception-backend.service
