@@ -21,11 +21,11 @@ jobs:
     - name: Create Env file
       run: |
        touch .env
-       echo POSTGRES_HOT="${{ secrets.POSTGRES_HOST }}" >> .env
-       echo POSTGRES_PASS="${{ secrets.POSTGRES_PASS }}" >> .env
-       echo POSTGRES_USER="${{ secrets.POSTGRES_USER }}" >> .env
-       echo POSTGRES_DB_NAME="${{ secrets.POSTGRES_DB_NAME }}" >> .env
-       echo MONGO_URI="${{ vars.MONGO_URI }}" >> .env
+        echo POSTGRES_HOST="${{ secrets.POSTGRES_HOST }}" >> .env
+        echo POSTGRES_PASS="${{ secrets.POSTGRES_PASS }}" >> .env
+        echo POSTGRES_USER="${{ secrets.POSTGRES_USER }}" >> .env
+        echo POSTGRES_DB_NAME="${{ secrets.POSTGRES_DB_NAME }}" >> .env
+        echo MONGO_URI="${{ vars.MONGO_URI }}" >> .env
 
     - name: Set up Go
       uses: actions/setup-go@v2
