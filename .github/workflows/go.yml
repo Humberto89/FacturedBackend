@@ -20,7 +20,7 @@ jobs:
 
     - name: Create Env file
       run: |
-       touch.env
+       touch .env
        echo POSTGRES_HOT="${{ secrets.POSTGRES_HOST }}" >> .env
        echo POSTGRES_PASS="${{ secrets.POSTGRES_PASS }}" >> .env
        echo POSTGRES_USER="${{ secrets.POSTGRES_USER }}" >> .env
