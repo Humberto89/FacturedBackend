@@ -13,6 +13,8 @@ jobs:
 
   build:
     runs-on: self-hosted
+    environment:
+      name: PROD
     
     steps:
     - name: Checkout Repositorio 
